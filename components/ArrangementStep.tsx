@@ -38,11 +38,9 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           Choose a greenery style, shuffle, and preview your arrangement.
         </p>
       </div>
-
-      {/* Main container */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        {/* Stage */}
-        <div className="mx-auto relative w-full max-w-[800px] h-[420px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
+        <div className="mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
+
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}

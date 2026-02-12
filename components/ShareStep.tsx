@@ -149,8 +149,6 @@ const ShareStep: React.FC<ShareStepProps> = ({
       flowers,
     };
   }, [decoded, payload]);
-
-  // ✅ Resolve holder from the decoded holderId (so share links show correct holder)
   const resolvedHolder =
     HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
 
@@ -159,8 +157,6 @@ const ShareStep: React.FC<ShareStepProps> = ({
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
-
-  // ✅ Hide the letter card if everything is empty
   const hasLetter =
     Boolean(renderModel.recipientName?.trim()) ||
     Boolean(renderModel.messageBody?.trim()) ||
@@ -169,12 +165,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
       {/* Header */}
-      <div className="mt-14 mb-2 px-4">
+      <div className="mt-14 mb-12 px-4">
         <div className="text-5xl font-cursive font-bold text-gray-900">
           BloomNotes
         </div>
 
-        <p className="mt-4 text-gray-600">
+        <p className="mt-4 font-bold text-gray-900 text-lg sm:text-xl">
+
           {renderModel.fromName
             ? "Hi, I made this bouquet for you!"
             : "A bouquet made with love."}
@@ -182,8 +179,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
       </div>
 
       {/* Main container */}
-      <div className="w-full max-w-7xl px-4 sm:px-6">
-        {/* If the link is invalid, show a friendly note (optional but helpful) */}
+      <div className="w-full max-w-2xl px-4 sm:px-6">
         {badLink && (
           <div className="mx-auto w-full max-w-[760px] mb-6">
             <div className="bg-white border border-gray-300 shadow-xl px-6 py-5 text-left rounded-md">
@@ -200,17 +196,22 @@ const ShareStep: React.FC<ShareStepProps> = ({
         {/* Stage */}
         <div
           className={[
-            "mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px]",
-            hasLetter ? "mb-12" : "mb-6",
+            "mx-auto relative w-full max-w-[800px]",
+            hasLetter
+              ? "h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-12"
+              : "h-[360px] sm:h-[420px] md:h-[460px] lg:h-[500px] mb-4",
           ].join(" ")}
         >
-          <BouquetPreview
-            selectedFlowers={renderModel.flowers}
-            holder={resolvedHolder}
-            clip={false}
-            holderFit="contain"
-          />
+          <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-12">
+            <BouquetPreview
+              selectedFlowers={renderModel.flowers}
+              holder={resolvedHolder}
+              clip={false}
+              holderFit="contain"
+            />
+          </div>
         </div>
+
 
         {/* Letter card (only if there is content) */}
         {hasLetter && (
@@ -237,7 +238,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
         {/* Share link section (only if NOT opened from a share link) */}
         {!openedFromLink && (
-          <div className="w-full flex flex-col items-center mt-2 mb-10">
+          <div
+            className={[
+              "w-full flex flex-col items-center mb-10",
+              hasLetter ? "mt-2" : "-mt-10 sm:-mt-12",
+            ].join(" ")}
+          >
+
             <div className="w-full max-w-[760px]">
               <div className="text-xs font-bold tracking-widest text-gray-600 mb-3">
                 CREATE SHAREABLE LINK

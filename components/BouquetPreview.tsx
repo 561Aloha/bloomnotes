@@ -1,4 +1,3 @@
-// BouquetPreview.tsx
 import React from "react";
 import { SelectedFlower, BouquetHolder } from "../types";
 
@@ -53,26 +52,22 @@ export default function BouquetPreview({
         alt={holder.name}
         className={`w-full h-full object-${holderFit} opacity-90 transition-all duration-500`}
       />
-
-      {/* Flowers overlay */}
       <div className="absolute inset-0 pointer-events-none">
         <div
-          className={[
-            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            // smaller lift on phones, bigger on larger screens
-            "translate-y-[-70px] sm:translate-y-[-90px] md:translate-y-[-105px]",
-          ].join(" ")}
+        className={[
+          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+          "translate-y-[-105px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
+        ].join(" ")}
+
           style={{
-            // ✅ FIXED clamp typo + tuned for mobile
             width: "clamp(220px, 72vw, 440px)",
           }}
         >
           <div
             className={[
-              // ✅ less negative spacing on mobile
               "flex flex-wrap justify-center items-end relative",
-              "-space-x-10 -space-y-16",
-              "sm:-space-x-12 sm:-space-y-20",
+              "-space-x-10 -space-y-12",
+              "sm:-space-x-10 sm:-space-y-20",
               "md:-space-x-14 md:-space-y-24",
             ].join(" ")}
           >
