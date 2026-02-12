@@ -42,7 +42,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
       {/* Main container */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
         {/* Stage */}
-        <div className="mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-10">
+        <div className="mx-auto relative w-full max-w-[780px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-10">
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}

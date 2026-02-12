@@ -1,9 +1,8 @@
 // ShareStep.tsx
 import React, { useMemo, useState } from "react";
 import { SelectedFlower, BouquetHolder, LayoutType } from "../types";
-import { FLOWERS } from "../constants";
+import { FLOWERS, HOLDERS } from "../constants";
 import BouquetPreview from "./BouquetPreview";
-import { HOLDERS } from "../constants"; // or wherever your holders array is
 
 /* ------------------- Share Payload Types ------------------- */
 
@@ -96,22 +95,30 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
   const shareUrl = useMemo(() => {
     const encoded = encodePayload(payload);
+    // hash routing: #/share?data=...
     return `${window.location.origin}${window.location.pathname}#/share?data=${encoded}`;
   }, [payload]);
 
   /* ----------- Decode Payload (when opened via link) ----------- */
 
-  const decoded = useMemo(() => {
-    const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const { decoded, hasDataParam } = useMemo(() => {
+    const hash = window.location.hash || "";
+    const q = hash.includes("?") ? hash.split("?")[1] : "";
+    const params = new URLSearchParams(q);
     const data = params.get("data");
-    return data ? decodePayload(data) : null;
+    return {
+      decoded: data ? decodePayload(data) : null,
+      hasDataParam: Boolean(data),
+    };
   }, []);
 
+  const openedFromLink = hasDataParam;
+  const badLink = hasDataParam && !decoded;
+
   /* ----------- Build Render Model ----------- */
-  const resolvedHolder =
-    HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
 
   const renderModel = useMemo(() => {
+    // If opened via link and decode failed, fall back to current payload safely
     const source = decoded ?? payload;
 
     const byId = new Map(FLOWERS.map((f) => [f.id, f]));
@@ -124,15 +131,15 @@ const ShareStep: React.FC<ShareStepProps> = ({
         return {
           ...base,
           instanceId: sf.instanceId,
-          rotation: sf.rotation,
-          offsetX: sf.offsetX,
-          offsetY: sf.offsetY,
-          zIndex: sf.zIndex,
+          rotation: sf.rotation ?? 0,
+          offsetX: sf.offsetX ?? 0,
+          offsetY: sf.offsetY ?? 0,
+          zIndex: sf.zIndex ?? 1,
         } as SelectedFlower;
       })
       .filter(Boolean) as SelectedFlower[];
 
-    // 🚫 DO NOT SORT — preserve payload order
+    // Preserve payload order — no sorting
     return {
       holderId: source.holderId,
       layoutType: source.layoutType,
@@ -143,13 +150,17 @@ const ShareStep: React.FC<ShareStepProps> = ({
     };
   }, [decoded, payload]);
 
+  // ✅ Resolve holder from the decoded holderId (so share links show correct holder)
+  const resolvedHolder =
+    HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
+
   const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const openedFromLink = Boolean(decoded);
+  // ✅ Hide the letter card if everything is empty
   const hasLetter =
     Boolean(renderModel.recipientName?.trim()) ||
     Boolean(renderModel.messageBody?.trim()) ||
@@ -157,7 +168,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
-
+      {/* Header */}
       <div className="mt-14 mb-2 px-4">
         <div className="text-5xl font-cursive font-bold text-gray-900">
           BloomNotes
@@ -172,38 +183,59 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
       {/* Main container */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <div className={`mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] ${hasLetter ? "mb-12" : "mb-6"}`}>
-
-        <BouquetPreview
-          selectedFlowers={renderModel.flowers}
-          holder={resolvedHolder}
-          clip={false}
-          holderFit="contain"
-        />
-        </div>
-
-      {hasLetter && (
-        <div className="relative -mt-24 mb-10 flex justify-center">
-          <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left">
-            <div className="text-md text-gray-800 mb-6">
-              {renderModel.recipientName ? `Dear ${renderModel.recipientName},` : "Dear,"}
-            </div>
-
-            <div className="text-md text-gray-700 leading-relaxed min-h-[16px] whitespace-pre-line">
-              {renderModel.messageBody || ""}
-            </div>
-
-            <div className="text-md text-gray-800 mt-4 text-right">
-              Yours truly,
-              <br />
-              {renderModel.fromName || ""}
+        {/* If the link is invalid, show a friendly note (optional but helpful) */}
+        {badLink && (
+          <div className="mx-auto w-full max-w-[760px] mb-6">
+            <div className="bg-white border border-gray-300 shadow-xl px-6 py-5 text-left rounded-md">
+              <div className="font-bold text-gray-900 mb-1">
+                This share link is invalid.
+              </div>
+              <div className="text-sm text-gray-600">
+                The bouquet data could not be loaded. Please ask for a new link.
+              </div>
             </div>
           </div>
+        )}
+
+        {/* Stage */}
+        <div
+          className={[
+            "mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px]",
+            hasLetter ? "mb-12" : "mb-6",
+          ].join(" ")}
+        >
+          <BouquetPreview
+            selectedFlowers={renderModel.flowers}
+            holder={resolvedHolder}
+            clip={false}
+            holderFit="contain"
+          />
         </div>
-      )}
 
+        {/* Letter card (only if there is content) */}
+        {hasLetter && (
+          <div className="relative -mt-24 mb-10 flex justify-center">
+            <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left">
+              <div className="text-md text-gray-800 mb-6">
+                {renderModel.recipientName?.trim()
+                  ? `Dear ${renderModel.recipientName.trim()},`
+                  : "Dear,"}
+              </div>
 
-        {/* Share link section (only if NOT opened from link) */}
+              <div className="text-md text-gray-700 leading-relaxed min-h-[16px] whitespace-pre-line">
+                {renderModel.messageBody || ""}
+              </div>
+
+              <div className="text-md text-gray-800 mt-4 text-right">
+                Yours truly,
+                <br />
+                {renderModel.fromName || ""}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Share link section (only if NOT opened from a share link) */}
         {!openedFromLink && (
           <div className="w-full flex flex-col items-center mt-2 mb-10">
             <div className="w-full max-w-[760px]">
@@ -247,43 +279,33 @@ const ShareStep: React.FC<ShareStepProps> = ({
             </div>
           </div>
         )}
+
         {/* Footer */}
-<div className="text-md text-gray-500 text-center space-y-2 mb-10">
-  <div>
-    made with Typescript, a tool by{" "}
-    <a
-      href="https://madebydianna.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="underline hover:text-gray-700 transition-colors"
-    >
-      @MadebyDianna
-    </a>
+        <div className="text-md text-gray-500 text-center space-y-2 mb-10">
+          <div>
+            made with Typescript, a tool by{" "}
+            <a
+              href="https://madebydianna.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-700 transition-colors"
+            >
+              @MadebyDianna
+            </a>
+          </div>
 
-  </div>
-  {openedFromLink ? (
-    <button
-      onClick={onRestart}
-      className="underline cursor-pointer"
-      type="button"
-    >
-      Create your own bouquet
-    </button>
-  ) : (
-    <button
-      onClick={onRestart}
-      className="underline cursor-pointer"
-      type="button"
-    >
-      make a bouquet now!
-    </button>
-  )}
-</div>
+          <button
+            onClick={onRestart}
+            className="underline cursor-pointer"
+            type="button"
+          >
+            {openedFromLink ? "Create your own bouquet" : "make a bouquet now!"}
+          </button>
+        </div>
 
-</div>
-</div>
-
-
+        <div className="h-10" />
+      </div>
+    </div>
   );
 };
 
