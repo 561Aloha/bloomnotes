@@ -1,8 +1,6 @@
 import React from "react";
 import { SelectedFlower, BouquetHolder } from "../types";
 
-/* ------------------- Glow Colors ------------------- */
-
 const glowMap: Record<string, string> = {
   flower1: "#A1A7EB",
   flower2: "#2838DF",
@@ -15,11 +13,10 @@ const glowMap: Record<string, string> = {
   flower9: "#9E0935",
   flower10: "#E9C6F1",
   flower11: "#3C1260",
+  flower12: "#E9C6F1",
+  flower13: "#3C1260",
 };
-
 const getGlowColor = (id: string) => glowMap[id] || "#ffffff";
-
-/* ------------------- Stable Jitter ------------------- */
 
 function jitterFor(seed: string) {
   let h = 0;
@@ -29,13 +26,11 @@ function jitterFor(seed: string) {
   return { x, y };
 }
 
-/* ------------------- Component ------------------- */
-
 export default function BouquetPreview({
   selectedFlowers,
   holder,
   clip = true,
-  holderFit = "contain",
+  holderFit = "cover",
   className = "",
 }: {
   selectedFlowers: SelectedFlower[];
@@ -47,12 +42,11 @@ export default function BouquetPreview({
   return (
     <div
       className={[
-        "relative h-full w-full rounded-2xl shadow-inner bg-transparent flex items-center justify-center",
+        "relative h-full w-full rounded-2xl  bg-transparent flex items-center justify-center",
         clip ? "overflow-hidden" : "overflow-visible",
         className,
       ].join(" ")}
     >
-      {/* Holder / background image */}
       <img
         src={holder.imageUrl}
         alt={holder.name}
@@ -64,32 +58,28 @@ export default function BouquetPreview({
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            // ✅ smaller on mobile, bigger on desktop
-            "scale-[0.85] sm:scale-[0.95] md:scale-[1.05] lg:scale-[1.25]",
-            // ✅ move bouquet up a bit (more on mobile)
-            "-translate-y-10 sm:-translate-y-14 md:-translate-y-16",
+            "translate-y-[-100px] scale-100 lg:scale-[1.0]",
+
           ].join(" ")}
-          style={{
-            // ✅ keep cluster from becoming too wide on phones
-            width: "clamp(220px, 58vw, 520px)",
+        style={{
+            width: "clamp(240px, 5=60%, 420px)",
           }}
         >
-          {/* ✅ tighter spacing on mobile */}
-          <div className="flex flex-wrap justify-center items-end -space-x-10 -space-y-16 sm:-space-x-14 sm:-space-y-24 relative">
+            <div className="flex flex-wrap justify-center items-end -space-x-14 -space-y-24 sm:-space-x-18 sm:-space-y-28 relative">
             {selectedFlowers.map((flower, idx) => {
               const j = jitterFor(flower.instanceId);
 
               const isLarge =
-                flower.id === "1" || flower.id === "3" || flower.id === "9";
+                flower.id === "flower1" ||
+                flower.id === "flower3" ||
+                flower.id === "flower9";
 
               const z = flower.zIndex ?? idx + 1;
-
-              // ✅ slightly reduced sizing so it behaves better on mobile
               const sizeClass = isLarge
-                ? "w-44 h-44 sm:w-52 sm:h-52 lg:w-64 lg:h-64"
+                ? "w-56 h-56 lg:w-64 lg:h-64"
                 : z <= 4
-                ? "w-36 h-36 sm:w-42 sm:h-42 lg:w-48 lg:h-48"
-                : "w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36";
+                ? "w-40 h-40 lg:w-48 lg:h-48"
+                : "w-32 h-32 lg:w-36 lg:h-36";
 
               return (
                 <div
@@ -118,7 +108,7 @@ export default function BouquetPreview({
                   <img
                     src={flower.imageUrl}
                     alt={flower.name}
-                    className={`relative object-contain drop-shadow-2xl ${sizeClass}`}
+                    className={`relative object-contain drop-shadow-xl ${sizeClass}`}
                     style={{ transform: `rotate(${flower.rotation ?? 0}deg)` }}
                   />
                 </div>

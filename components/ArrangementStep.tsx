@@ -42,7 +42,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
       {/* Main container */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
         {/* Stage */}
-        <div className="mx-auto relative w-full max-w-[820px] h-[420px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
+        <div className="mx-auto relative w-full max-w-[800px] h-[420px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}
@@ -54,8 +54,6 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 bg-white/85 px-6 py-2 rounded-full text-sm font-bold text-gray-700 shadow-sm border border-gray-200">
             {currentHolder.name}
           </div>
-
-          {/* ✅ Holder tag BOTTOM on desktop (hidden below md) */}
           <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 px-8 py-2 rounded-full text-md font-bold text-gray-600 shadow-sm">
             {currentHolder.name}
           </div>
