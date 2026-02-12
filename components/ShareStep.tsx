@@ -199,7 +199,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
             "mx-auto relative w-full max-w-[800px]",
             hasLetter
               ? "h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-12"
-              : "h-[360px] sm:h-[420px] md:h-[460px] lg:h-[500px] mb-4",
+              : "h-[400px] sm:h-[420px] md:h-[460px] lg:h-[500px] mb-4",
           ].join(" ")}
         >
           <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-12">
@@ -269,7 +269,14 @@ const ShareStep: React.FC<ShareStepProps> = ({
               <div className="mt-6 flex justify-center gap-4">
                 <button
                   onClick={onBack}
-                  className="px-12 py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60 transition-colors"
+                  className="
+                    px-6 py-2
+                    text-xs sm:px-12 sm:py-3
+                    rounded-md font-bold tracking-widest uppercase
+                    bg-black text-white
+                    hover:opacity-90 transition-opacity
+                  "
+
                   type="button"
                 >
                   Back
@@ -277,7 +284,14 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
                 <button
                   onClick={onRestart}
-                  className="px-12 py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
+                  className="
+                    px-6 py-2
+                    sm:px-12 sm:py-3
+                    rounded-md font-bold tracking-widest uppercase
+                    border border-gray-400 text-gray-700
+                    hover:bg-white/60 transition-colors
+                  "
+
                   type="button"
                 >
                   Make Another
