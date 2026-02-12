@@ -1,3 +1,4 @@
+// BouquetPreview.tsx
 import React from "react";
 import { SelectedFlower, BouquetHolder } from "../types";
 
@@ -42,7 +43,7 @@ export default function BouquetPreview({
   return (
     <div
       className={[
-        "relative h-full w-full rounded-2xl  bg-transparent flex items-center justify-center",
+        "relative h-full w-full rounded-2xl bg-transparent flex items-center justify-center",
         clip ? "overflow-hidden" : "overflow-visible",
         className,
       ].join(" ")}
@@ -58,14 +59,23 @@ export default function BouquetPreview({
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            "translate-y-[-100px] scale-100 lg:scale-[1.0]",
-
+            // smaller lift on phones, bigger on larger screens
+            "translate-y-[-70px] sm:translate-y-[-90px] md:translate-y-[-105px]",
           ].join(" ")}
-        style={{
-            width: "clamp(240px, 5=60%, 420px)",
+          style={{
+            // ✅ FIXED clamp typo + tuned for mobile
+            width: "clamp(220px, 72vw, 440px)",
           }}
         >
-            <div className="flex flex-wrap justify-center items-end -space-x-14 -space-y-24 sm:-space-x-18 sm:-space-y-28 relative">
+          <div
+            className={[
+              // ✅ less negative spacing on mobile
+              "flex flex-wrap justify-center items-end relative",
+              "-space-x-10 -space-y-16",
+              "sm:-space-x-12 sm:-space-y-20",
+              "md:-space-x-14 md:-space-y-24",
+            ].join(" ")}
+          >
             {selectedFlowers.map((flower, idx) => {
               const j = jitterFor(flower.instanceId);
 
@@ -75,11 +85,13 @@ export default function BouquetPreview({
                 flower.id === "flower9";
 
               const z = flower.zIndex ?? idx + 1;
+
+              // ✅ MOBILE-FIRST sizing (smaller by default)
               const sizeClass = isLarge
-                ? "w-56 h-56 lg:w-64 lg:h-64"
+                ? "w-36 h-36 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
                 : z <= 4
-                ? "w-40 h-40 lg:w-48 lg:h-48"
-                : "w-32 h-32 lg:w-36 lg:h-36";
+                ? "w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48"
+                : "w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40";
 
               return (
                 <div
@@ -95,7 +107,7 @@ export default function BouquetPreview({
                   }}
                 >
                   <div
-                    className="absolute rounded-full blur-[70px] opacity-10"
+                    className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10"
                     style={{
                       width: "140%",
                       height: "140%",

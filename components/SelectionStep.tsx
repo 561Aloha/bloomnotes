@@ -26,7 +26,8 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
   const MIN = 4;
   const MAX = 6;
 
-  const isComplete = selectedFlowers.length >= MIN && selectedFlowers.length <= MAX;
+  const isComplete =
+    selectedFlowers.length >= MIN && selectedFlowers.length <= MAX;
 
   // Count selected flowers by id
   const counts: CountMap = useMemo(() => {
@@ -49,30 +50,38 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
   }, [selectedFlowers]);
 
   const chips = useMemo(() => {
-    return (Object.entries(counts) as Array<[string, CountInfo]>).map(([id, info]) => ({
-      id,
-      name: info.name,
-      count: info.count,
-      removeInstanceId: info.instanceIds[info.instanceIds.length - 1],
-    }));
+    return (Object.entries(counts) as Array<[string, CountInfo]>).map(
+      ([id, info]) => ({
+        id,
+        name: info.name,
+        count: info.count,
+        removeInstanceId: info.instanceIds[info.instanceIds.length - 1],
+      })
+    );
   }, [counts]);
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
       {/* Header */}
       <div className="mt-14 mb-10 px-4">
-        <div className="text-5xl font-cursive font-bold text-gray-900">BloomNotes</div>
+        <div className="text-5xl font-cursive font-bold text-gray-900">
+          BloomNotes
+        </div>
+
         <div className="mt-6 text-sm font-bold tracking-[0.2em] text-gray-900">
           PICK {MIN} TO {MAX} BLOOMS
         </div>
 
-        <p className="mt-3 text-gray-500">Click on a flower’s name to deselect it.</p>
+        <p className="mt-3 text-gray-500">
+          Click on a flower’s name to deselect it.
+        </p>
       </div>
 
       {/* Flower Grid */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-2 gap-y-1 place-items-center">
-
+        <div className="
+        grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4
+        gap-x-1 gap-y-1 sm:gap-x-3 sm:gap-y-3 place-items-center ">
           {FLOWERS.slice(0, 14).map((flower) => {
             const countForThis = counts[flower.id]?.count ?? 0;
 
@@ -81,12 +90,18 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
                 key={flower.id}
                 onClick={() => onAdd(flower)}
                 className="relative group focus:outline-none active:scale-[0.97] transition-transform"
+                type="button"
               >
                 <img
                   src={flower.imageUrl}
                   alt={flower.name}
-                  className="w-[190px] h-[190px] sm:w-[220px] sm:h-[220px] md:w-[190px] md:h-[190px] object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
-
+                  className="
+                    w-[140px] h-[140px]
+                    sm:w-[170px] sm:h-[170px]
+                    md:w-[190px] md:h-[190px]
+                    lg:w-[210px] lg:h-[210px]
+                    object-cover rounded-xl transition-transform duration-300 group-hover:scale-105
+                  "
                 />
 
                 {/* Count bubble */}
@@ -107,6 +122,7 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
               key={c.id}
               onClick={() => onRemove(c.removeInstanceId)}
               className="px-6 py-2 rounded-full border border-gray-500 text-gray-900 text-sm tracking-widest uppercase hover:bg-white/60 transition-colors"
+              type="button"
             >
               {c.name} x{c.count}
             </button>
@@ -119,15 +135,20 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
             disabled={!isComplete}
             onClick={onNext}
             className={`px-12 py-3 rounded-md font-bold tracking-widest uppercase transition-all ${
-              isComplete ? "bg-black text-white hover:opacity-100" : "bg-black text-white opacity-30 cursor-not-allowed"
+              isComplete
+                ? "bg-black text-white hover:opacity-100"
+                : "bg-black text-white opacity-30 cursor-not-allowed"
             }`}
+            type="button"
           >
             Next
           </button>
         </div>
 
         {!isComplete && (
-          <p className="mt-4 text-xs text-gray-500">Select {MIN}–{MAX} flowers to continue.</p>
+          <p className="mt-4 text-xs text-gray-500">
+            Select {MIN}–{MAX} flowers to continue.
+          </p>
         )}
       </div>
     </div>
