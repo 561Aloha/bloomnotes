@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import { SelectedFlower, BouquetHolder, LayoutType } from "../types";
 import { FLOWERS } from "../constants";
 import BouquetPreview from "./BouquetPreview";
+import { HOLDERS } from "../constants"; // or wherever your holders array is
 
 /* ------------------- Share Payload Types ------------------- */
 
@@ -107,6 +108,8 @@ const ShareStep: React.FC<ShareStepProps> = ({
   }, []);
 
   /* ----------- Build Render Model ----------- */
+  const resolvedHolder =
+    HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
 
   const renderModel = useMemo(() => {
     const source = decoded ?? payload;
@@ -147,6 +150,10 @@ const ShareStep: React.FC<ShareStepProps> = ({
   };
 
   const openedFromLink = Boolean(decoded);
+  const hasLetter =
+    Boolean(renderModel.recipientName?.trim()) ||
+    Boolean(renderModel.messageBody?.trim()) ||
+    Boolean(renderModel.fromName?.trim());
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
@@ -165,22 +172,21 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
       {/* Main container */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-12">
+        <div className={`mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] ${hasLetter ? "mb-12" : "mb-6"}`}>
 
-          <BouquetPreview
-            selectedFlowers={renderModel.flowers}
-            holder={holder}
-            clip={false}
-            holderFit="contain"
-          />
+        <BouquetPreview
+          selectedFlowers={renderModel.flowers}
+          holder={resolvedHolder}
+          clip={false}
+          holderFit="contain"
+        />
         </div>
 
+      {hasLetter && (
         <div className="relative -mt-24 mb-10 flex justify-center">
           <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left">
             <div className="text-md text-gray-800 mb-6">
-              {renderModel.recipientName
-                ? `Dear ${renderModel.recipientName},`
-                : "Dear,"}
+              {renderModel.recipientName ? `Dear ${renderModel.recipientName},` : "Dear,"}
             </div>
 
             <div className="text-md text-gray-700 leading-relaxed min-h-[16px] whitespace-pre-line">
@@ -188,12 +194,14 @@ const ShareStep: React.FC<ShareStepProps> = ({
             </div>
 
             <div className="text-md text-gray-800 mt-4 text-right">
-              Sincerely,
+              Yours truly,
               <br />
               {renderModel.fromName || ""}
             </div>
           </div>
         </div>
+      )}
+
 
         {/* Share link section (only if NOT opened from link) */}
         {!openedFromLink && (
