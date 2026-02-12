@@ -42,24 +42,28 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
       {/* Main container */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
         {/* Stage */}
-        <div className="mx-auto relative w-full max-w-[780px] h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-10">
+        <div className="mx-auto relative w-full max-w-[820px] h-[420px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}
-            clip={false} 
+            clip={false}
             holderFit="contain"
           />
 
-          {/* Holder Name */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 px-8 py-2 rounded-full text-md font-bold text-gray-600">
+          {/* ✅ Holder tag TOP on mobile (hidden on md+) */}
+          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 bg-white/85 px-6 py-2 rounded-full text-sm font-bold text-gray-700 shadow-sm border border-gray-200">
             {currentHolder.name}
           </div>
 
-          {/* Arrows */}
+          {/* ✅ Holder tag BOTTOM on desktop (hidden below md) */}
+          <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 px-8 py-2 rounded-full text-md font-bold text-gray-600 shadow-sm">
+            {currentHolder.name}
+          </div>
+
           <button
             onClick={onPrevHolder}
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg z-50"
-            aria-label="Previous holder"
+            className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg z-50"
+            aria-label="Previous greenery"
             type="button"
           >
             ‹
@@ -67,15 +71,29 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
 
           <button
             onClick={onNextHolder}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg z-50"
-            aria-label="Next holder"
+            className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg z-50"
+            aria-label="Next greenery"
             type="button"
-          >›
+          >
+            ›
+          </button>
+        </div>
+        <div className="md:hidden mt-2 flex justify-center items-center gap-14">
+          <button
+            onClick={onPrevHolder}
+            className="px-6 py-3 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold"
+            type="button">
+            ‹
+          </button>
+          <button
+            onClick={onNextHolder}
+            className="px-6 py-3 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold"
+            type="button">›
           </button>
         </div>
 
         {/* Shuffle */}
-        <div className="mb-10 flex justify-center">
+        <div className="mt-8 mb-10 flex justify-center">
           <button
             onClick={onShuffle}
             className="px-8 py-3 rounded-full border border-gray-500 text-gray-900 text-sm tracking-widest uppercase hover:bg-white/60 transition-colors"
@@ -94,6 +112,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           >
             Back
           </button>
+
           <button
             onClick={onNext}
             className="px-12 py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
