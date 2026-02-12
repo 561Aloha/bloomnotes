@@ -106,16 +106,13 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           <button
             onClick={onBack}
             className="px-12 py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60 transition-colors"
-            type="button"
-          >
+            type="button">
             Back
           </button>
-
           <button
             onClick={onNext}
             className="px-12 py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
-            type="button"
-          >
+            type="button">
             Next
           </button>
         </div>
