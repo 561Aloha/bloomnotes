@@ -91,13 +91,17 @@ export default function BouquetPreview({
 
       {/* 🌸 Flowers Layer */}
       <div className="absolute inset-0">
-        <div
-          className={[
-            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            "translate-y-[-20px] sm:translate-y-[-100px] md:translate-y-[-140px] lg:translate-y-[-155px]",
-          ].join(" ")}
-          style={{ width: "clamp(200px, 70vw, 420px)" }}
-        >
+      <div
+        className={[
+          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+          "translate-y-[-10px] sm:translate-y-[-80px] md:translate-y-[-120px] lg:translate-y-[-140px]"
+        ].join(" ")}
+        style={{
+          width: "clamp(220px, 75vw, 460px)",
+          height: "clamp(260px, 55vw, 520px)", // 👈 NEW
+        }}
+      >
+
           <div
             className={[
               "flex flex-wrap justify-center items-end relative",

@@ -41,7 +41,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
 
       {/* ✅ Preview wrapper now controls mobile overlay */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto relative w-full max-w-[800px] h-[380px] sm:h-[520px] md:h-[600px] lg:h-[680px]">
+        <div className="mx-auto relative w-full max-w-[800px] h-[475px] sm:h-[520px] md:h-[600px] lg:h-[680px]">
           <div className="md:hidden absolute top-1 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px]">
             <button
               onClick={onShuffle}
