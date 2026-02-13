@@ -129,8 +129,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-8 px-4 sm:px-6">
-      <main className="w-full rounded-none p-6 shadow-xl relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center py-4 px-4 sm:px-2">
+      <main className="w-full rounded-none p-4 shadow-xl relative overflow-hidden">
         {currentStep === "selection" && (
           <SelectionStep
             selectedFlowers={selectedFlowers}

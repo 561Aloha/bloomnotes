@@ -165,12 +165,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
       {/* Header */}
-      <div className="mt-14 mb-12 px-4">
+      <div className={["px-4", hasLetter ? "mt-10 mb-6" : "mt-14 mb-10"].join(" ")}>
+
         <div className="text-5xl font-cursive font-bold text-gray-900">
           BloomNotes
         </div>
 
-        <p className="mt-4 font-bold text-gray-900 text-lg sm:text-xl">
+        <p className="mt-4 font-bold text-gray-900 text-lg sm:text-xl z-10">
 
           {renderModel.fromName
             ? "Hi, I made this bouquet for you!"
@@ -179,7 +180,9 @@ const ShareStep: React.FC<ShareStepProps> = ({
       </div>
 
       {/* Main container */}
-      <div className="w-full max-w-2xl px-4 sm:px-6">
+
+      <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+
         {badLink && (
           <div className="mx-auto w-full max-w-[760px] mb-6">
             <div className="bg-white border border-gray-300 shadow-xl px-6 py-5 text-left rounded-md">
@@ -193,16 +196,15 @@ const ShareStep: React.FC<ShareStepProps> = ({
           </div>
         )}
 
-        {/* Stage */}
         <div
           className={[
             "mx-auto relative w-full max-w-[800px]",
             hasLetter
-              ? "h-[520px] sm:h-[600px] md:h-[660px] lg:h-[700px] mb-12"
+              ? "h-[420px] sm:h-[520px] md:h-[560px] lg:h-[600px] mb-6"
               : "h-[400px] sm:h-[420px] md:h-[460px] lg:h-[500px] mb-4",
           ].join(" ")}
         >
-          <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-12">
+          <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-4">
             <BouquetPreview
               selectedFlowers={renderModel.flowers}
               holder={resolvedHolder}
@@ -270,7 +272,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
                 <button
                   onClick={onBack}
                   className="
-                    px-6 py-2
+                    px-4 py-2
                     text-xs sm:px-12 sm:py-3
                     rounded-md font-bold tracking-widest uppercase
                     bg-black text-white
