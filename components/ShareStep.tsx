@@ -1,8 +1,9 @@
 // ShareStep.tsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { SelectedFlower, BouquetHolder, LayoutType } from "../types";
 import { FLOWERS, HOLDERS } from "../constants";
 import BouquetPreview from "./BouquetPreview";
+import { supabase } from "../supabaseClient"; // <-- CHANGE this path to wherever your client is
 
 /* ------------------- Share Payload Types ------------------- */
 
@@ -23,22 +24,6 @@ type SharePayload = {
   messageBody: string;
   fromName: string;
   flowers: ShareFlower[];
-};
-
-/* ------------------- Encoding Helpers ------------------- */
-
-const encodePayload = (payload: SharePayload) =>
-  encodeURIComponent(
-    btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
-  );
-
-const decodePayload = (s: string): SharePayload | null => {
-  try {
-    const json = decodeURIComponent(escape(atob(decodeURIComponent(s))));
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
 };
 
 interface ShareStepProps {
@@ -64,7 +49,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  /* ----------- Build Payload ----------- */
+  // NEW: short link state + remote payload state
+  const [shareUrl, setShareUrl] = useState<string>("");
+  const [remotePayload, setRemotePayload] = useState<SharePayload | null>(null);
+  const [openedFromLink, setOpenedFromLink] = useState(false);
+  const [badLink, setBadLink] = useState(false);
+
+  /* ----------- Build Payload (local) ----------- */
 
   const payload: SharePayload = useMemo(
     () => ({
@@ -83,43 +74,64 @@ const ShareStep: React.FC<ShareStepProps> = ({
         zIndex: f.zIndex ?? 1,
       })),
     }),
-    [
-      holder.id,
-      layoutType,
-      recipientName,
-      messageBody,
-      fromName,
-      selectedFlowers,
-    ]
+    [holder.id, layoutType, recipientName, messageBody, fromName, selectedFlowers]
   );
 
-  const shareUrl = useMemo(() => {
-    const encoded = encodePayload(payload);
-    // hash routing: #/share?data=...
-    return `${window.location.origin}${window.location.pathname}#/share?data=${encoded}`;
-  }, [payload]);
+  /* ----------- NEW: Load from short share link (#/share/:id) ----------- */
 
-  /* ----------- Decode Payload (when opened via link) ----------- */
-
-  const { decoded, hasDataParam } = useMemo(() => {
+  useEffect(() => {
     const hash = window.location.hash || "";
-    const q = hash.includes("?") ? hash.split("?")[1] : "";
-    const params = new URLSearchParams(q);
-    const data = params.get("data");
-    return {
-      decoded: data ? decodePayload(data) : null,
-      hasDataParam: Boolean(data),
-    };
+
+    // Matches "#/share/<id>" (no query params)
+    const match = hash.match(/^#\/share\/([^?]+)/);
+    const id = match?.[1];
+
+    if (!id) return; // not opened from a short link
+
+    setOpenedFromLink(true);
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("bouquet_links")
+        .select("data")
+        .eq("id", id)
+        .single();
+
+      if (error || !data?.data) {
+        console.error("Failed to load bouquet:", error);
+        setBadLink(true);
+        return;
+      }
+
+      setRemotePayload(data.data as SharePayload);
+    })();
   }, []);
 
-  const openedFromLink = hasDataParam;
-  const badLink = hasDataParam && !decoded;
+  /* ----------- NEW: Create short share link ----------- */
 
-  /* ----------- Build Render Model ----------- */
+  const createShareLink = async () => {
+    const { data, error } = await supabase
+      .from("bouquet_links")
+      .insert({ data: payload })
+      .select("id")
+      .single();
 
+    if (error || !data?.id) {
+      console.error("Share insert failed:", error);
+      alert("Could not create share link. Check Supabase env vars + RLS.");
+      return;
+    }
+
+    const url = `${window.location.origin}#/share/${data.id}`;
+    setShareUrl(url);
+
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
   const renderModel = useMemo(() => {
-    // If opened via link and decode failed, fall back to current payload safely
-    const source = decoded ?? payload;
+    // If opened via short link, use remote payload once it loads
+    const source = remotePayload ?? payload;
 
     const byId = new Map(FLOWERS.map((f) => [f.id, f]));
 
@@ -139,7 +151,6 @@ const ShareStep: React.FC<ShareStepProps> = ({
       })
       .filter(Boolean) as SelectedFlower[];
 
-    // Preserve payload order — no sorting
     return {
       holderId: source.holderId,
       layoutType: source.layoutType,
@@ -148,15 +159,11 @@ const ShareStep: React.FC<ShareStepProps> = ({
       fromName: source.fromName,
       flowers,
     };
-  }, [decoded, payload]);
+  }, [remotePayload, payload]);
+
   const resolvedHolder =
     HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
 
-  const copyLink = async () => {
-    await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
   const hasLetter =
     Boolean(renderModel.recipientName?.trim()) ||
     Boolean(renderModel.messageBody?.trim()) ||
@@ -166,13 +173,11 @@ const ShareStep: React.FC<ShareStepProps> = ({
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
       {/* Header */}
       <div className={["px-4", hasLetter ? "mt-10 mb-6" : "mt-14 mb-10"].join(" ")}>
-
         <div className="text-5xl font-cursive font-bold text-gray-900">
           BloomNotes
         </div>
 
         <p className="mt-4 font-bold text-gray-900 text-lg sm:text-xl z-10">
-
           {renderModel.fromName
             ? "Hi, I made this bouquet for you!"
             : "A bouquet made with love."}
@@ -180,9 +185,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
       </div>
 
       {/* Main container */}
-
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
-
         {badLink && (
           <div className="mx-auto w-full max-w-[760px] mb-6">
             <div className="bg-white border border-gray-300 shadow-xl px-6 py-5 text-left rounded-md">
@@ -214,8 +217,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
           </div>
         </div>
 
-
-        {/* Letter card (only if there is content) */}
+        {/* Letter card */}
         {hasLetter && (
           <div className="relative -mt-24 mb-10 flex justify-center">
             <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left">
@@ -246,7 +248,6 @@ const ShareStep: React.FC<ShareStepProps> = ({
               hasLetter ? "mt-2" : "-mt-10 sm:-mt-12",
             ].join(" ")}
           >
-
             <div className="w-full max-w-[760px]">
               <div className="text-xs font-bold tracking-widest text-gray-600 mb-3">
                 CREATE SHAREABLE LINK
@@ -256,11 +257,12 @@ const ShareStep: React.FC<ShareStepProps> = ({
                 <input
                   value={shareUrl}
                   readOnly
+                  placeholder="Click Copy to generate a link"
                   className="flex-1 px-4 py-3 rounded-md border border-gray-300 bg-white text-sm text-gray-700"
                 />
 
                 <button
-                  onClick={copyLink}
+                  onClick={createShareLink}
                   className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90"
                   type="button"
                 >
@@ -271,14 +273,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
               <div className="mt-6 flex justify-center gap-4">
                 <button
                   onClick={onBack}
-                  className="
-                    px-4 py-2
-                    text-xs sm:px-12 sm:py-3
-                    rounded-md font-bold tracking-widest uppercase
-                    bg-black text-white
-                    hover:opacity-90 transition-opacity
-                  "
-
+                  className="px-4 py-2 text-xs sm:px-12 sm:py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
                   type="button"
                 >
                   Back
@@ -286,14 +281,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
                 <button
                   onClick={onRestart}
-                  className="
-                    px-6 py-2
-                    sm:px-12 sm:py-3
-                    rounded-md font-bold tracking-widest uppercase
-                    border border-gray-400 text-gray-700
-                    hover:bg-white/60 transition-colors
-                  "
-
+                  className="px-6 py-2 sm:px-12 sm:py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60 transition-colors"
                   type="button"
                 >
                   Make Another
@@ -317,11 +305,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
             </a>
           </div>
 
-          <button
-            onClick={onRestart}
-            className="underline cursor-pointer"
-            type="button"
-          >
+          <button onClick={onRestart} className="underline cursor-pointer" type="button">
             {openedFromLink ? "Create your own bouquet" : "make a bouquet now!"}
           </button>
         </div>
