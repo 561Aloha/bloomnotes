@@ -69,7 +69,7 @@ export default function BouquetPreview({
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            "translate-y-[-70px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
+            "translate-y-[-60px] sm:translate-y-[-100px] md:translate-y-[-140px] lg:translate-y-[-155px]",
 
                 ].join(" ")}
           style={{
