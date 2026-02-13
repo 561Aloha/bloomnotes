@@ -108,27 +108,36 @@ const ShareStep: React.FC<ShareStepProps> = ({
   }, []);
 
   /* ----------- NEW: Create short share link ----------- */
+const createShareLink = async () => {
+  const res = await supabase
+    .from("bouquet_links")
+    .insert({ data: payload })
+    .select("id");
 
-  const createShareLink = async () => {
-    const { data, error } = await supabase
-      .from("bouquet_links")
-      .insert({ data: payload })
-      .select("id")
-      .single();
+  console.log("INSERT RES:", res);
 
-    if (error || !data?.id) {
-      console.error("Share insert failed:", error);
-      alert("Could not create share link. Check Supabase env vars + RLS.");
-      return;
-    }
+  if (res.error) {
+    alert(
+      `code: ${res.error.code}\nmessage: ${res.error.message}\ndetails: ${res.error.details}\nhint: ${res.error.hint}`
+    );
+    return;
+  }
 
-    const url = `${window.location.origin}#/share/${data.id}`;
-    setShareUrl(url);
+  const newId = res.data?.[0]?.id;
+  if (!newId) {
+    alert("Insert succeeded but no id returned. We'll fetch it differently.");
+    return;
+  }
 
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
+  const url = `${window.location.origin}#/share/${newId}`;
+  setShareUrl(url);
+
+  await navigator.clipboard.writeText(url);
+  setCopied(true);
+  setTimeout(() => setCopied(false), 1500);
+};
+
+
   const renderModel = useMemo(() => {
     // If opened via short link, use remote payload once it loads
     const source = remotePayload ?? payload;
