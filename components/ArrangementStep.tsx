@@ -41,7 +41,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
 
       <div className="w-full max-w-7xl px-4 sm:px-6">
         {/* Preview (slightly shorter on mobile + keeps holder visually larger) */}
-        <div className="mx-auto relative w-full max-w-[800px] h-[460px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
+        <div className="mx-auto relative w-full max-w-[800px] h-[460px] sm:h-[300px] md:h-[620px] lg:h-[680px]">
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}
