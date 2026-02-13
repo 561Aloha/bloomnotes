@@ -23,6 +23,7 @@ type SharePayload = {
   recipientName: string;
   messageBody: string;
   fromName: string;
+  greeneryId: string; 
   flowers: ShareFlower[];
 };
 
@@ -32,6 +33,8 @@ interface ShareStepProps {
   recipientName: string;
   messageBody: string;
   fromName: string;
+  greeneryId: string;
+
   layoutType: LayoutType;
   onBack: () => void;
   onRestart: () => void;
@@ -44,12 +47,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
   messageBody,
   fromName,
   layoutType,
+  greeneryId,
   onBack,
   onRestart,
 }) => {
   const [copied, setCopied] = useState(false);
 
-  // NEW: short link state + remote payload state
+  const [isGenerating, setIsGenerating] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
   const [remotePayload, setRemotePayload] = useState<SharePayload | null>(null);
   const [openedFromLink, setOpenedFromLink] = useState(false);
@@ -65,6 +69,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
       recipientName,
       messageBody,
       fromName,
+      greeneryId,     // ✅ add
       flowers: selectedFlowers.map((f) => ({
         id: f.id,
         instanceId: f.instanceId,
@@ -74,8 +79,9 @@ const ShareStep: React.FC<ShareStepProps> = ({
         zIndex: f.zIndex ?? 1,
       })),
     }),
-    [holder.id, layoutType, recipientName, messageBody, fromName, selectedFlowers]
+    [holder.id, layoutType, recipientName, messageBody, fromName, greeneryId, selectedFlowers]
   );
+
 
   /* ----------- NEW: Load from short share link (#/share/:id) ----------- */
 
@@ -108,35 +114,44 @@ const ShareStep: React.FC<ShareStepProps> = ({
   }, []);
 
   /* ----------- NEW: Create short share link ----------- */
-const createShareLink = async () => {
-  const res = await supabase
-    .from("bouquet_links")
-    .insert({ data: payload })
-    .select("id");
+  const createShareLink = async () => {
+    // If we already made one, just copy it again
+    if (shareUrl) {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+      return;
+    }
 
-  console.log("INSERT RES:", res);
+    setIsGenerating(true);
 
-  if (res.error) {
-    alert(
-      `code: ${res.error.code}\nmessage: ${res.error.message}\ndetails: ${res.error.details}\nhint: ${res.error.hint}`
-    );
-    return;
-  }
+    const res = await supabase
+      .from("bouquet_links")
+      .insert({ data: payload })
+      .select("id");
 
-  const newId = res.data?.[0]?.id;
-  if (!newId) {
-    alert("Insert succeeded but no id returned. We'll fetch it differently.");
-    return;
-  }
+    setIsGenerating(false);
 
-  const url = `${window.location.origin}#/share/${newId}`;
-  setShareUrl(url);
+    if (res.error) {
+      alert(
+        `code: ${res.error.code}\nmessage: ${res.error.message}\ndetails: ${res.error.details}\nhint: ${res.error.hint}`
+      );
+      return;
+    }
 
-  await navigator.clipboard.writeText(url);
-  setCopied(true);
-  setTimeout(() => setCopied(false), 1500);
-};
+    const newId = res.data?.[0]?.id;
+    if (!newId) {
+      alert("Insert succeeded but no id returned.");
+      return;
+    }
 
+    const url = `${window.location.origin}#/share/${newId}`;
+    setShareUrl(url);
+
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   const renderModel = useMemo(() => {
     // If opened via short link, use remote payload once it loads
@@ -165,6 +180,7 @@ const createShareLink = async () => {
       layoutType: source.layoutType,
       recipientName: source.recipientName,
       messageBody: source.messageBody,
+      greeneryId: (source as any).greeneryId ?? greeneryId, 
       fromName: source.fromName,
       flowers,
     };
@@ -270,13 +286,15 @@ const createShareLink = async () => {
                   className="flex-1 px-4 py-3 rounded-md border border-gray-300 bg-white text-sm text-gray-700"
                 />
 
-                <button
-                  onClick={createShareLink}
-                  className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90"
-                  type="button"
-                >
-                  {copied ? "Copied!" : "Copy"}
-                </button>
+            <button
+              onClick={createShareLink}
+              disabled={isGenerating}
+              className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+              type="button"
+            >
+              {isGenerating ? "Generating..." : copied ? "Copied!" : shareUrl ? "Copy Again" : "Copy"}
+            </button>
+
               </div>
 
               <div className="mt-6 flex justify-center gap-4">

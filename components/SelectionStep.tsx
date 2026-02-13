@@ -86,12 +86,20 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
             const countForThis = counts[flower.id]?.count ?? 0;
 
             return (
-              <button
-                key={flower.id}
-                onClick={() => onAdd(flower)}
-                className="relative group focus:outline-none active:scale-[0.97] transition-transform"
-                type="button"
-              >
+            <button
+              key={flower.id}
+              onClick={() => {
+                if (selectedFlowers.length >= MAX) return;
+                onAdd(flower);
+              }}
+              disabled={selectedFlowers.length >= MAX}
+              className={[
+                "relative group focus:outline-none active:scale-[0.97] transition-transform",
+                selectedFlowers.length >= MAX ? "opacity-60 cursor-not-allowed" : "",
+              ].join(" ")}
+              type="button"
+            >
+
                 <img
                   src={flower.imageUrl}
                   alt={flower.name}

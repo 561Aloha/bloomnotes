@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { SelectedFlower, BouquetHolder } from "../types";
 
 const glowMap: Record<string, string> = {
@@ -21,15 +21,14 @@ const getGlowColor = (id: string) => glowMap[id] || "#ffffff";
 
 function jitterFor(seed: string) {
   let h = 0;
-  for (let i = 0; i < seed.length; i++) {
-    h = (h * 31 + seed.charCodeAt(i)) | 0;
-  }
-
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
   const x = (h % 25) - 12;
   const y = ((h >> 5) % 25) - 12;
-
   return { x, y };
 }
+
+// 0=xs, 1=s, 2=m, 3=l
+const SIZE_STEPS = [0.85, 1.0, 1.15, 1.3] as const;
 
 export default function BouquetPreview({
   selectedFlowers,
@@ -44,6 +43,33 @@ export default function BouquetPreview({
   holderFit?: "cover" | "contain";
   className?: string;
 }) {
+  // Map instanceId -> sizeStepIndex
+  const [sizeMap, setSizeMap] = useState<Record<string, number>>({});
+
+  useMemo(() => {
+    const ids = new Set(selectedFlowers.map((f) => f.instanceId));
+
+    setSizeMap((prev) => {
+      const next: Record<string, number> = {};
+
+      for (const [k, v] of Object.entries(prev) as [string, number][]) {
+        if (ids.has(k)) next[k] = v; // ✅ v is number now
+      }
+
+      return next;
+    });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [selectedFlowers.map((f) => f.instanceId).join("|")]);
+
+  const cycleSize = (instanceId: string) => {
+    setSizeMap((prev) => {
+      const cur = prev[instanceId] ?? 1; // default = "s"
+      const next = (cur + 1) % 4;
+      return { ...prev, [instanceId]: next };
+    });
+  };
+
   return (
     <div
       className={[
@@ -59,28 +85,22 @@ export default function BouquetPreview({
         className={[
           "w-full h-full opacity-90 transition-all duration-500",
           `object-${holderFit}`,
-          // Slightly larger on mobile only
           "scale-[1.08] sm:scale-100",
         ].join(" ")}
       />
 
       {/* 🌸 Flowers Layer */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0">
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            "translate-y-[-60px] sm:translate-y-[-100px] md:translate-y-[-140px] lg:translate-y-[-155px]",
-
-                ].join(" ")}
-          style={{
-            width: "clamp(200px, 70vw, 420px)",
-          }}
+            "translate-y-[-20px] sm:translate-y-[-100px] md:translate-y-[-140px] lg:translate-y-[-155px]",
+          ].join(" ")}
+          style={{ width: "clamp(200px, 70vw, 420px)" }}
         >
           <div
             className={[
               "flex flex-wrap justify-center items-end relative",
-
-              // ✅ Flowers closer together on mobile
               "-space-x-14 -space-y-16",
               "sm:-space-x-10 sm:-space-y-20",
               "md:-space-x-14 md:-space-y-24",
@@ -92,22 +112,35 @@ export default function BouquetPreview({
               const isLarge =
                 flower.id === "flower1" ||
                 flower.id === "flower3" ||
-
                 flower.id === "flower10" ||
                 flower.id === "flower9";
 
               const z = flower.zIndex ?? idx + 1;
 
-              const sizeClass = isLarge
+              // Your base size logic stays
+              const baseSizeClass = isLarge
                 ? "w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
                 : z <= 4
                 ? "w-24 h-24 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48"
                 : "w-20 h-20 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40";
 
+              // Tap-size multiplier (xs/s/m/l)
+              const stepIndex = sizeMap[flower.instanceId] ?? 1; // default s
+              const sizeMult = SIZE_STEPS[stepIndex];
+
               return (
-                <div
+                <button
                   key={flower.instanceId}
-                  className="relative flex justify-center items-end"
+                  type="button"
+                  className="relative flex justify-center items-end bg-transparent border-0 p-0 m-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cycleSize(flower.instanceId);
+                  }}
+                  onTouchStart={(e) => {
+                    // makes taps feel immediate on mobile
+                    e.stopPropagation();
+                  }}
                   style={{
                     zIndex: 50 + z,
                     transform: `translate(${(flower.offsetX ?? 0) + j.x}px, ${
@@ -119,7 +152,7 @@ export default function BouquetPreview({
                 >
                   {/* Glow */}
                   <div
-                    className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10"
+                    className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10 pointer-events-none"
                     style={{
                       width: "140%",
                       height: "140%",
@@ -133,12 +166,17 @@ export default function BouquetPreview({
                   <img
                     src={flower.imageUrl}
                     alt={flower.name}
-                    className={`relative object-contain drop-shadow-xl ${sizeClass}`}
+                    className={`relative object-contain drop-shadow-xl ${baseSizeClass}`}
                     style={{
-                      transform: `rotate(${flower.rotation ?? 0}deg)`,
+                      transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
+                      transition:
+                        "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                      transformOrigin: "bottom center",
+                      touchAction: "manipulation",
                     }}
+                    draggable={false}
                   />
-                </div>
+                </button>
               );
             })}
           </div>
