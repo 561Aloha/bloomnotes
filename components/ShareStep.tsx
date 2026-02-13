@@ -156,7 +156,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
     const source = remotePayload ?? payload;
 
     const resolvedGreeneryId =
-      source.greeneryId ?? source.holderId ?? greeneryId;
+      source.holderId ?? source.holderId ?? greeneryId;
 
     const byId = new Map(FLOWERS.map((f) => [f.id, f]));
 
@@ -181,7 +181,6 @@ const ShareStep: React.FC<ShareStepProps> = ({
       layoutType: source.layoutType,
       recipientName: source.recipientName,
       messageBody: source.messageBody,
-      greeneryId: resolvedGreeneryId,
       fromName: source.fromName,
       flowers,
     };
@@ -192,7 +191,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
     Boolean(renderModel.messageBody?.trim()) ||
     Boolean(renderModel.fromName?.trim());
   const resolvedGreenery =
-    HOLDERS.find((h) => h.id === renderModel.greeneryId) ?? holder;
+    HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">

@@ -16,7 +16,6 @@ import flower10 from './assets/flower10.png';
 import flower11 from './assets/flower11.png';
 import flower12 from './assets/flower12.png';
 import flower13 from './assets/flower13.png';
-
 import flower14 from './assets/flower14.png';
 
 export const FLOWERS: Flower[] = [
@@ -32,8 +31,8 @@ export const FLOWERS: Flower[] = [
   { id: '10', name: 'Carnation', imageUrl: flower10, color: 'bg-rose-100' },
   { id: '11', name: 'Ranunculus', imageUrl: flower11, color: 'bg-orange-100' },
   { id: '13', name: 'HandDrawn', imageUrl: flower12, color: 'bg-orange-100' },
-  { id: '14', name: 'Ranunculus', imageUrl: flower13, color: 'bg-orange-100' },
-  { id: '15', name: 'Ranunculus', imageUrl: flower14, color: 'bg-orange-100' },
+  { id: '14', name: 'HandDrawn', imageUrl: flower13, color: 'bg-orange-100' },
+  { id: '15', name: 'HandDrawn', imageUrl: flower14, color: 'bg-orange-100' },
 ];
 
 export const HOLDERS: BouquetHolder[] = [
