@@ -39,7 +39,6 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
         </p>
       </div>
 
-      <div className="w-full max-w-7xl px-4 sm:px-6">
         {/* Preview (slightly shorter on mobile + keeps holder visually larger) */}
         <div className="mx-auto relative w-full max-w-[800px] h-[460px] sm:h-[300px] md:h-[620px] lg:h-[680px]">
           <BouquetPreview
@@ -125,8 +124,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
             type="button"
           >
             Next
-          </button>
-        </div>
+          </button>  
       </div>
 
       <div className="h-4 sm:h-5" />
