@@ -16,13 +16,18 @@ const glowMap: Record<string, string> = {
   flower12: "#E9C6F1",
   flower13: "#3C1260",
 };
+
 const getGlowColor = (id: string) => glowMap[id] || "#ffffff";
 
 function jitterFor(seed: string) {
   let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = (h * 31 + seed.charCodeAt(i)) | 0;
+  }
+
   const x = (h % 25) - 12;
   const y = ((h >> 5) % 25) - 12;
+
   return { x, y };
 }
 
@@ -47,23 +52,26 @@ export default function BouquetPreview({
         className,
       ].join(" ")}
     >
-      {/* ✅ Make greenery/holder a bit larger on mobile */}
+      {/* 🌿 Holder / Greenery */}
       <img
         src={holder.imageUrl}
         alt={holder.name}
         className={[
           "w-full h-full opacity-90 transition-all duration-500",
           `object-${holderFit}`,
+          // Slightly larger on mobile only
           "scale-[1.08] sm:scale-100",
         ].join(" ")}
       />
 
+      {/* 🌸 Flowers Layer */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            // ✅ Bouquet sits a touch lower on mobile (more natural + fuller)
-            "translate-y-[-92px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
+
+            // ✅ Shift bouquet upward on mobile
+            "translate-y-[-120px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
           ].join(" ")}
           style={{
             width: "clamp(220px, 72vw, 440px)",
@@ -72,8 +80,9 @@ export default function BouquetPreview({
           <div
             className={[
               "flex flex-wrap justify-center items-end relative",
+
               // ✅ Flowers closer together on mobile
-              "-space-x-12 -space-y-14",
+              "-space-x-14 -space-y-16",
               "sm:-space-x-10 sm:-space-y-20",
               "md:-space-x-14 md:-space-y-24",
             ].join(" ")}
@@ -107,6 +116,7 @@ export default function BouquetPreview({
                       "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                   }}
                 >
+                  {/* Glow */}
                   <div
                     className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10"
                     style={{
@@ -118,11 +128,14 @@ export default function BouquetPreview({
                     }}
                   />
 
+                  {/* Flower image */}
                   <img
                     src={flower.imageUrl}
                     alt={flower.name}
                     className={`relative object-contain drop-shadow-xl ${sizeClass}`}
-                    style={{ transform: `rotate(${flower.rotation ?? 0}deg)` }}
+                    style={{
+                      transform: `rotate(${flower.rotation ?? 0}deg)`,
+                    }}
                   />
                 </div>
               );
