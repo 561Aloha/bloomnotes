@@ -69,11 +69,11 @@ export default function BouquetPreview({
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            "translate-y-[-98px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
+            "translate-y-[-70px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
 
                 ].join(" ")}
           style={{
-            width: "clamp(220px, 72vw, 440px)",
+            width: "clamp(200px, 70vw, 420px)",
           }}
         >
           <div
@@ -92,15 +92,17 @@ export default function BouquetPreview({
               const isLarge =
                 flower.id === "flower1" ||
                 flower.id === "flower3" ||
+
+                flower.id === "flower10" ||
                 flower.id === "flower9";
 
               const z = flower.zIndex ?? idx + 1;
 
               const sizeClass = isLarge
-                ? "w-36 h-36 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
+                ? "w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
                 : z <= 4
-                ? "w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48"
-                : "w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40";
+                ? "w-24 h-24 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48"
+                : "w-20 h-20 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40";
 
               return (
                 <div
