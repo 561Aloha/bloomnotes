@@ -180,14 +180,14 @@ const ShareStep: React.FC<ShareStepProps> = ({
       layoutType: source.layoutType,
       recipientName: source.recipientName,
       messageBody: source.messageBody,
-      greeneryId: (source as any).greeneryId ?? greeneryId, 
+      greeneryId: (source).greeneryId ?? greeneryId, 
       fromName: source.fromName,
       flowers,
     };
   }, [remotePayload, payload]);
 
-  const resolvedHolder =
-    HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
+  const resolvedGreenery =
+    HOLDERS.find((h) => h.id === renderModel.greeneryId) ?? holder;
 
   const hasLetter =
     Boolean(renderModel.recipientName?.trim()) ||
@@ -233,12 +233,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
           ].join(" ")}
         >
           <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-4">
-            <BouquetPreview
-              selectedFlowers={renderModel.flowers}
-              holder={resolvedHolder}
-              clip={false}
-              holderFit="contain"
-            />
+          <BouquetPreview
+            selectedFlowers={renderModel.flowers}
+            holder={resolvedGreenery}
+            clip={false}
+            holderFit="contain"
+          />
+
           </div>
         </div>
 
