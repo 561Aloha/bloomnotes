@@ -47,18 +47,24 @@ export default function BouquetPreview({
         className,
       ].join(" ")}
     >
+      {/* ✅ Make greenery/holder a bit larger on mobile */}
       <img
         src={holder.imageUrl}
         alt={holder.name}
-        className={`w-full h-full object-${holderFit} opacity-90 transition-all duration-500`}
+        className={[
+          "w-full h-full opacity-90 transition-all duration-500",
+          `object-${holderFit}`,
+          "scale-[1.08] sm:scale-100",
+        ].join(" ")}
       />
+
       <div className="absolute inset-0 pointer-events-none">
         <div
-        className={[
-          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-          "translate-y-[-105px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
-        ].join(" ")}
-
+          className={[
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            // ✅ Bouquet sits a touch lower on mobile (more natural + fuller)
+            "translate-y-[-92px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
+          ].join(" ")}
           style={{
             width: "clamp(220px, 72vw, 440px)",
           }}
@@ -66,7 +72,8 @@ export default function BouquetPreview({
           <div
             className={[
               "flex flex-wrap justify-center items-end relative",
-              "-space-x-10 -space-y-12",
+              // ✅ Flowers closer together on mobile
+              "-space-x-12 -space-y-14",
               "sm:-space-x-10 sm:-space-y-20",
               "md:-space-x-14 md:-space-y-24",
             ].join(" ")}
@@ -81,7 +88,6 @@ export default function BouquetPreview({
 
               const z = flower.zIndex ?? idx + 1;
 
-              // ✅ MOBILE-FIRST sizing (smaller by default)
               const sizeClass = isLarge
                 ? "w-36 h-36 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
                 : z <= 4

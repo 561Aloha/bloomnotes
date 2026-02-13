@@ -24,23 +24,24 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
 }) => {
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
-      {/* Header */}
-      <div className="mt-14 mb-10 px-4">
+      {/* Header (tighter on mobile) */}
+      <div className="mt-8 mb-6 px-4 sm:mt-12 sm:mb-8">
         <div className="text-5xl font-cursive font-bold text-gray-900">
           BloomNotes
         </div>
 
-        <div className="mt-6 text-sm font-bold tracking-[0.2em] text-gray-900">
+        <div className="mt-4 sm:mt-6 text-sm font-bold tracking-[0.2em] text-gray-900">
           ARRANGE YOUR BOUQUET
         </div>
 
-        <p className="mt-3 text-gray-500">
+        <p className="mt-2 sm:mt-3 text-gray-500">
           Choose a greenery style, shuffle, and preview your arrangement.
         </p>
       </div>
-      <div className="w-full max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto relative w-full max-w-[800px] h-[520px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
 
+      <div className="w-full max-w-7xl px-4 sm:px-6">
+        {/* Preview (slightly shorter on mobile + keeps holder visually larger) */}
+        <div className="mx-auto relative w-full max-w-[800px] h-[460px] sm:h-[560px] md:h-[620px] lg:h-[680px]">
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}
@@ -48,17 +49,15 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
             holderFit="contain"
           />
 
-          {/* ✅ Holder tag TOP on mobile (hidden on md+) */}
-          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 bg-white/85 px-6 py-2 rounded-full text-sm font-bold text-gray-700 shadow-sm border border-gray-200">
-            {currentHolder.name}
-          </div>
+          {/* Desktop holder pill stays */}
           <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 px-8 py-2 rounded-full text-md font-bold text-gray-600 shadow-sm">
             {currentHolder.name}
           </div>
 
+          {/* Desktop side arrows (slightly bigger) */}
           <button
             onClick={onPrevHolder}
-            className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg z-50"
+            className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-4 rounded-full shadow-lg z-50 text-4xl leading-none"
             aria-label="Previous greenery"
             type="button"
           >
@@ -67,29 +66,41 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
 
           <button
             onClick={onNextHolder}
-            className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg z-50"
+            className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-4 rounded-full shadow-lg z-50 text-4xl leading-none"
             aria-label="Next greenery"
             type="button"
           >
             ›
           </button>
         </div>
-        <div className="md:hidden mt-2 flex justify-center items-center gap-14">
+
+        {/* ✅ MOBILE: arrows + holder pill all in one line */}
+        <div className="md:hidden mt-2 flex justify-center items-center gap-4">
           <button
             onClick={onPrevHolder}
-            className="px-6 py-3 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold"
-            type="button">
+            className="w-14 h-14 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold text-4xl leading-none flex items-center justify-center"
+            type="button"
+            aria-label="Previous greenery"
+          >
             ‹
           </button>
+
+          <div className="bg-white/85 px-5 py-2 rounded-full text-sm font-bold text-gray-700 shadow-sm border border-gray-200 max-w-[70%] truncate">
+            {currentHolder.name}
+          </div>
+
           <button
             onClick={onNextHolder}
-            className="px-6 py-3 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold"
-            type="button">›
+            className="w-14 h-14 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold text-4xl leading-none flex items-center justify-center"
+            type="button"
+            aria-label="Next greenery"
+          >
+            ›
           </button>
         </div>
 
-        {/* Shuffle */}
-        <div className="mt-8 mb-10 flex justify-center">
+        {/* Shuffle (tighter) */}
+        <div className="mt-4 mb-6 sm:mt-8 sm:mb-10 flex justify-center">
           <button
             onClick={onShuffle}
             className="px-8 py-3 rounded-full border border-gray-500 text-gray-900 text-sm tracking-widest uppercase hover:bg-white/60 transition-colors"
@@ -99,24 +110,26 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           </button>
         </div>
 
-        {/* Navigation */}
-        <div className="mt-2 flex justify-center gap-4">
+        {/* Navigation (tighter spacing) */}
+        <div className="mt-3 sm:mt-2 flex justify-center gap-4">
           <button
             onClick={onBack}
-            className="px-12 py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60 transition-colors"
-            type="button">
+            className="px-10 sm:px-12 py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60 transition-colors"
+            type="button"
+          >
             Back
           </button>
           <button
             onClick={onNext}
-            className="px-12 py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
-            type="button">
+            className="px-10 sm:px-12 py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
+            type="button"
+          >
             Next
           </button>
         </div>
       </div>
 
-      <div className="h-5" />
+      <div className="h-4 sm:h-5" />
     </div>
   );
 };
