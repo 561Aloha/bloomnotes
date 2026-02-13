@@ -60,16 +60,15 @@ const ShareStep: React.FC<ShareStepProps> = ({
   const [badLink, setBadLink] = useState(false);
 
   /* ----------- Build Payload (local) ----------- */
-
   const payload: SharePayload = useMemo(
     () => ({
       v: 1,
-      holderId: holder.id,
+      holderId: holder.id,       // greenery choice
+      greeneryId: holder.id,     // keep in sync (important)
       layoutType,
       recipientName,
       messageBody,
       fromName,
-      greeneryId,     // ✅ add
       flowers: selectedFlowers.map((f) => ({
         id: f.id,
         instanceId: f.instanceId,
@@ -79,7 +78,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
         zIndex: f.zIndex ?? 1,
       })),
     }),
-    [holder.id, layoutType, recipientName, messageBody, fromName, greeneryId, selectedFlowers]
+    [holder.id, layoutType, recipientName, messageBody, fromName, selectedFlowers]
   );
 
 
@@ -154,8 +153,10 @@ const ShareStep: React.FC<ShareStepProps> = ({
   };
 
   const renderModel = useMemo(() => {
-    // If opened via short link, use remote payload once it loads
     const source = remotePayload ?? payload;
+
+    const resolvedGreeneryId =
+      source.greeneryId ?? source.holderId ?? greeneryId;
 
     const byId = new Map(FLOWERS.map((f) => [f.id, f]));
 
@@ -180,19 +181,18 @@ const ShareStep: React.FC<ShareStepProps> = ({
       layoutType: source.layoutType,
       recipientName: source.recipientName,
       messageBody: source.messageBody,
-      greeneryId: (source).greeneryId ?? greeneryId, 
+      greeneryId: resolvedGreeneryId,
       fromName: source.fromName,
       flowers,
     };
-  }, [remotePayload, payload]);
-
-  const resolvedGreenery =
-    HOLDERS.find((h) => h.id === renderModel.greeneryId) ?? holder;
+  }, [remotePayload, payload, greeneryId]);
 
   const hasLetter =
     Boolean(renderModel.recipientName?.trim()) ||
     Boolean(renderModel.messageBody?.trim()) ||
     Boolean(renderModel.fromName?.trim());
+  const resolvedGreenery =
+    HOLDERS.find((h) => h.id === renderModel.greeneryId) ?? holder;
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
