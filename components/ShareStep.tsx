@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { SelectedFlower, BouquetHolder, LayoutType } from "../types";
 import { FLOWERS, HOLDERS } from "../constants";
 import BouquetPreview from "./BouquetPreview";
-import { supabase } from "../supabaseClient"; // <-- CHANGE this path to wherever your client is
+import { supabase } from "../supabaseClient";
 
 /* ------------------- Share Payload Types ------------------- */
 
@@ -23,7 +23,6 @@ type SharePayload = {
   recipientName: string;
   messageBody: string;
   fromName: string;
-  greeneryId: string; 
   flowers: ShareFlower[];
 };
 
@@ -33,8 +32,6 @@ interface ShareStepProps {
   recipientName: string;
   messageBody: string;
   fromName: string;
-  greeneryId: string;
-
   layoutType: LayoutType;
   onBack: () => void;
   onRestart: () => void;
@@ -47,7 +44,6 @@ const ShareStep: React.FC<ShareStepProps> = ({
   messageBody,
   fromName,
   layoutType,
-  greeneryId,
   onBack,
   onRestart,
 }) => {
@@ -63,8 +59,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
   const payload: SharePayload = useMemo(
     () => ({
       v: 1,
-      holderId: holder.id,       // greenery choice
-      greeneryId: holder.id,     // keep in sync (important)
+      holderId: holder.id,
       layoutType,
       recipientName,
       messageBody,
@@ -81,17 +76,13 @@ const ShareStep: React.FC<ShareStepProps> = ({
     [holder.id, layoutType, recipientName, messageBody, fromName, selectedFlowers]
   );
 
-
-  /* ----------- NEW: Load from short share link (#/share/:id) ----------- */
-
+  /* ----------- Load from short share link (#/share/:id) ----------- */
   useEffect(() => {
     const hash = window.location.hash || "";
-
-    // Matches "#/share/<id>" (no query params)
     const match = hash.match(/^#\/share\/([^?]+)/);
     const id = match?.[1];
 
-    if (!id) return; // not opened from a short link
+    if (!id) return;
 
     setOpenedFromLink(true);
 
@@ -112,9 +103,8 @@ const ShareStep: React.FC<ShareStepProps> = ({
     })();
   }, []);
 
-  /* ----------- NEW: Create short share link ----------- */
+  /* ----------- Create short share link ----------- */
   const createShareLink = async () => {
-    // If we already made one, just copy it again
     if (shareUrl) {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -152,11 +142,9 @@ const ShareStep: React.FC<ShareStepProps> = ({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  /* ----------- Build Render Model ----------- */
   const renderModel = useMemo(() => {
     const source = remotePayload ?? payload;
-
-    const resolvedGreeneryId =
-      source.holderId ?? source.holderId ?? greeneryId;
 
     const byId = new Map(FLOWERS.map((f) => [f.id, f]));
 
@@ -177,20 +165,21 @@ const ShareStep: React.FC<ShareStepProps> = ({
       .filter(Boolean) as SelectedFlower[];
 
     return {
-      holderId: source.holderId,
+      holderId: source.holderId ?? holder.id,
       layoutType: source.layoutType,
       recipientName: source.recipientName,
       messageBody: source.messageBody,
       fromName: source.fromName,
       flowers,
     };
-  }, [remotePayload, payload, greeneryId]);
+  }, [remotePayload, payload, holder.id]);
 
   const hasLetter =
     Boolean(renderModel.recipientName?.trim()) ||
     Boolean(renderModel.messageBody?.trim()) ||
     Boolean(renderModel.fromName?.trim());
-  const resolvedGreenery =
+
+  const resolvedHolder =
     HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
 
   return (
@@ -232,13 +221,12 @@ const ShareStep: React.FC<ShareStepProps> = ({
           ].join(" ")}
         >
           <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-4">
-          <BouquetPreview
-            selectedFlowers={renderModel.flowers}
-            holder={resolvedGreenery}
-            clip={false}
-            holderFit="contain"
-          />
-
+            <BouquetPreview
+              selectedFlowers={renderModel.flowers}
+              holder={resolvedHolder}
+              clip={false}
+              holderFit="contain"
+            />
           </div>
         </div>
 
@@ -286,15 +274,20 @@ const ShareStep: React.FC<ShareStepProps> = ({
                   className="flex-1 px-4 py-3 rounded-md border border-gray-300 bg-white text-sm text-gray-700"
                 />
 
-            <button
-              onClick={createShareLink}
-              disabled={isGenerating}
-              className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-              type="button"
-            >
-              {isGenerating ? "Generating..." : copied ? "Copied!" : shareUrl ? "Copy Again" : "Copy"}
-            </button>
-
+                <button
+                  onClick={createShareLink}
+                  disabled={isGenerating}
+                  className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                  type="button"
+                >
+                  {isGenerating
+                    ? "Generating..."
+                    : copied
+                    ? "Copied!"
+                    : shareUrl
+                    ? "Copy Again"
+                    : "Copy"}
+                </button>
               </div>
 
               <div className="mt-6 flex justify-center gap-4">
