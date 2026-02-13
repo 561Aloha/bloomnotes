@@ -42,17 +42,15 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
       {/* ✅ Preview wrapper now controls mobile overlay */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
         <div className="mx-auto relative w-full max-w-[800px] h-[380px] sm:h-[520px] md:h-[600px] lg:h-[680px]">
-          {/* ✅ MOBILE overlay Shuffle button */}
-          <div className="md:hidden absolute top-3 left-1/2 -translate-x-1/2 z-50">
+          <div className="md:hidden absolute top-1 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px]">
             <button
               onClick={onShuffle}
-              className="px-6 py-2 rounded-full border border-gray-500 bg-white/80 text-gray-900 text-xs tracking-widest uppercase hover:bg-white transition-colors shadow-sm backdrop-blur"
+              className="w-full px-6 py-2 rounded-full border border-gray-500 bg-white/80 text-gray-900 text-xs tracking-widest uppercase hover:bg-white transition-colors shadow-sm backdrop-blur whitespace-nowrap"
               type="button"
             >
               Shuffle Style
             </button>
           </div>
-
           <BouquetPreview
             selectedFlowers={selectedFlowers}
             holder={currentHolder}
@@ -95,11 +93,9 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           >
             ‹
           </button>
-
-          <div className="bg-white/85 px-5 py-2 rounded-full text-sm font-bold text-gray-700 shadow-sm border border-gray-200 max-w-[70%] truncate">
+          <div className="h-14 px-5 rounded-full bg-white/85 text-sm font-bold text-gray-700 shadow-sm border border-gray-200 max-w-[62%] truncate flex items-center justify-center">
             {currentHolder.name}
           </div>
-
           <button
             onClick={onNextHolder}
             className="w-14 h-14 rounded-full bg-white/90 hover:bg-white shadow-md border border-gray-200 font-semibold text-4xl leading-none flex items-center justify-center"

@@ -69,10 +69,9 @@ export default function BouquetPreview({
         <div
           className={[
             "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            "translate-y-[-98px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
 
-            // ✅ Shift bouquet upward on mobile
-            "translate-y-[-120px] sm:translate-y-[-125px] md:translate-y-[-140px] lg:translate-y-[-155px]",
-          ].join(" ")}
+                ].join(" ")}
           style={{
             width: "clamp(220px, 72vw, 440px)",
           }}
