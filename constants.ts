@@ -2,7 +2,7 @@
 
 import { Flower, BouquetHolder } from './types';
 
-// 🌸 Import local flower assets
+// 🌸 Flower imports
 import flower1 from './assets/flower1.png';
 import flower2 from './assets/flower2.png';
 import flower3 from './assets/flower3.png';
@@ -17,6 +17,14 @@ import flower11 from './assets/flower11.png';
 import flower12 from './assets/flower12.png';
 import flower13 from './assets/flower13.png';
 import flower14 from './assets/flower14.png';
+
+// 🌿 Holder PNG imports (YOUR greenery files)
+import greenery2 from './assets/greenery2.png';
+import greenery3 from './assets/greenery3.png';
+import greenery4 from './assets/greenery4.png';
+import greenery5 from './assets/greenery5.png';
+import greenery6 from './assets/greenery6.png';
+import greenery7 from './assets/greenery7.png';
 
 export const FLOWERS: Flower[] = [
   { id: '1', name: 'Peony', imageUrl: flower1, color: 'bg-pink-100' },
@@ -36,29 +44,10 @@ export const FLOWERS: Flower[] = [
 ];
 
 export const HOLDERS: BouquetHolder[] = [
-  {
-    id: 'h1',
-    name: 'Craft Paper',
-    imageUrl: '/holders/craft-paper.png',
-  },
-  {
-    id: 'h2',
-    name: 'Glass Vase',
-    imageUrl: '/holders/glass-vase.png',
-  },
-  {
-    id: 'h3',
-    name: 'Ceramic Jar',
-    imageUrl: '/holders/ceramic-jar.png',
-  },
-  {
-    id: 'h4',
-    name: 'Greenery Wrap',
-    imageUrl: '/holders/greenery-wrap.png',
-  },
-  {
-    id: 'h5',
-    name: 'Silk Ribbon',
-    imageUrl: '/holders/silk-ribbon.png',
-  },
+  { id: 'greenery-2', name: 'Greenery 2', imageUrl: greenery2 },
+  { id: 'greenery-3', name: 'Greenery 3', imageUrl: greenery3 },
+  { id: 'greenery-4', name: 'Greenery 4', imageUrl: greenery4 },
+  { id: 'greenery-5', name: 'Greenery 5', imageUrl: greenery5 },
+  { id: 'greenery-6', name: 'Greenery 6', imageUrl: greenery6 },
+  { id: 'greenery-7', name: 'Greenery 7', imageUrl: greenery7 },
 ];

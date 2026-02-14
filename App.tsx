@@ -1,33 +1,12 @@
+// App.tsx
 import React, { useEffect, useState } from "react";
-import {
-  Step,
-  SelectedFlower,
-  Flower,
-  LayoutType,
-  BouquetHolder,
-} from "./types";
+import { Step, SelectedFlower, Flower, LayoutType } from "./types";
+import { HOLDERS } from "./constants";
 
 import SelectionStep from "./components/SelectionStep";
 import ArrangementStep from "./components/ArrangementStep";
 import MessageStep from "./components/MessageStep";
 import ShareStep from "./components/ShareStep";
-
-import greenery2 from "./assets/greenery2.png";
-import greenery3 from "./assets/greenery3.png";
-import greenery4 from "./assets/greenery4.png";
-import greenery5 from "./assets/greenery5.png";
-import greenery6 from "./assets/greenery6.png";
-import greenery7 from "./assets/greenery7.png";
-
-/* ✅ Holders defined here */
-const HOLDERS: BouquetHolder[] = [
-  { id: "greenery-2", name: "Greenery 2", imageUrl: greenery2 },
-  { id: "greenery-3", name: "Greenery 3", imageUrl: greenery3 },
-  { id: "greenery-4", name: "Greenery 4", imageUrl: greenery4 },
-  { id: "greenery-5", name: "Greenery 5", imageUrl: greenery5 },
-  { id: "greenery-6", name: "Greenery 6", imageUrl: greenery6 },
-  { id: "greenery-7", name: "Greenery 7", imageUrl: greenery7 },
-];
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>("selection");
@@ -38,7 +17,6 @@ const App: React.FC = () => {
   const [messageBody, setMessageBody] = useState("");
   const [fromName, setFromName] = useState("");
 
-  // ✅ Share mode: if URL is #/share?data=..., render ShareStep no matter what
   const [isShareMode, setIsShareMode] = useState(false);
 
   useEffect(() => {
@@ -99,24 +77,22 @@ const App: React.FC = () => {
     setCurrentStep("selection");
     setCurrentHolderIndex(0);
     setLayoutType("circle");
-    // ✅ also clear share hash if you're in share mode
     window.location.hash = "#/";
   };
 
-  // ✅ IMPORTANT: when in share mode, render ShareStep even if app state is empty
   if (isShareMode) {
     return (
       <div className="min-h-screen flex flex-col items-center py-8 px-4 sm:px-6 bg-[#f3f0e6]">
         <main className="w-full">
           <ShareStep
-            selectedFlowers={selectedFlowers} // ShareStep will decode if opened from link
+            selectedFlowers={selectedFlowers}
             holder={HOLDERS[currentHolderIndex] ?? HOLDERS[0]}
+            holders={HOLDERS}
             recipientName={recipientName}
             messageBody={messageBody}
             fromName={fromName}
             layoutType={layoutType}
             onBack={() => {
-              // optional: bring them back to builder
               window.location.hash = "#/";
               setIsShareMode(false);
               setCurrentStep("selection");
@@ -170,6 +146,7 @@ const App: React.FC = () => {
           <ShareStep
             selectedFlowers={selectedFlowers}
             holder={HOLDERS[currentHolderIndex]}
+            holders={HOLDERS}
             recipientName={recipientName}
             messageBody={messageBody}
             fromName={fromName}

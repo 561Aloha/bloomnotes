@@ -36,12 +36,14 @@ export default function BouquetPreview({
   clip = true,
   holderFit = "cover",
   className = "",
+  interactive = true,
 }: {
   selectedFlowers: SelectedFlower[];
   holder: BouquetHolder;
   clip?: boolean;
   holderFit?: "cover" | "contain";
   className?: string;
+  interactive?: boolean;
 }) {
   // Map instanceId -> sizeStepIndex
   const [sizeMap, setSizeMap] = useState<Record<string, number>>({});
@@ -83,11 +85,12 @@ export default function BouquetPreview({
         src={holder.imageUrl}
         alt={holder.name}
         className={[
-          "w-full h-full opacity-90 transition-all duration-500",
+          "w-full h-full opacity-90 transition-all duration-500 pointer-events-none",
           `object-${holderFit}`,
           "scale-[1.08] sm:scale-100",
         ].join(" ")}
       />
+
 
       {/* 🌸 Flowers Layer */}
       <div className="absolute inset-0">
@@ -132,56 +135,57 @@ export default function BouquetPreview({
               const stepIndex = sizeMap[flower.instanceId] ?? 1; // default s
               const sizeMult = SIZE_STEPS[stepIndex];
 
-              return (
-                <button
-                  key={flower.instanceId}
-                  type="button"
-                  className="relative flex justify-center items-end bg-transparent border-0 p-0 m-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    cycleSize(flower.instanceId);
-                  }}
-                  onTouchStart={(e) => {
-                    // makes taps feel immediate on mobile
-                    e.stopPropagation();
-                  }}
+            return (
+              <button
+                key={flower.instanceId}
+                type="button"
+                disabled={!interactive}
+                className={[
+                  "relative flex justify-center items-end bg-transparent border-0 p-0 m-0",
+                  interactive ? "cursor-pointer" : "cursor-default",
+                ].join(" ")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!interactive) return;     // ✅ locks in ShareStep
+                  cycleSize(flower.instanceId); // ✅ works in Arrangement
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                }}
+                style={{
+                  zIndex: 50 + z,
+                  transform: `translate(${(flower.offsetX ?? 0) + j.x}px, ${
+                    (flower.offsetY ?? 0) + j.y
+                  }px)`,
+                  transition: "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                }}
+              >
+                {/* Glow */}
+                <div
+                  className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10 pointer-events-none"
                   style={{
-                    zIndex: 50 + z,
-                    transform: `translate(${(flower.offsetX ?? 0) + j.x}px, ${
-                      (flower.offsetY ?? 0) + j.y
-                    }px)`,
-                    transition:
-                      "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    width: "140%",
+                    height: "140%",
+                    background: `radial-gradient(circle, ${getGlowColor(flower.id)} 0%, transparent 70%)`,
                   }}
-                >
-                  {/* Glow */}
-                  <div
-                    className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10 pointer-events-none"
-                    style={{
-                      width: "140%",
-                      height: "140%",
-                      background: `radial-gradient(circle, ${getGlowColor(
-                        flower.id
-                      )} 0%, transparent 70%)`,
-                    }}
-                  />
+                />
 
-                  {/* Flower image */}
-                  <img
-                    src={flower.imageUrl}
-                    alt={flower.name}
-                    className={`relative object-contain drop-shadow-xl ${baseSizeClass}`}
-                    style={{
-                      transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
-                      transition:
-                        "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                      transformOrigin: "bottom center",
-                      touchAction: "manipulation",
-                    }}
-                    draggable={false}
-                  />
-                </button>
-              );
+                {/* Flower image */}
+                <img
+                  src={flower.imageUrl}
+                  alt={flower.name}
+                  className={`relative object-contain drop-shadow-xl ${baseSizeClass}`}
+                  style={{
+                    transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
+                    transition: "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    transformOrigin: "bottom center",
+                    touchAction: "manipulation",
+                  }}
+                  draggable={false}
+                />
+              </button>
+            );
+
             })}
           </div>
         </div>

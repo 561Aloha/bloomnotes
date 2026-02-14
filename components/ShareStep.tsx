@@ -1,7 +1,7 @@
 // ShareStep.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { SelectedFlower, BouquetHolder, LayoutType } from "../types";
-import { FLOWERS, HOLDERS } from "../constants";
+import { FLOWERS } from "../constants";
 import BouquetPreview from "./BouquetPreview";
 import { supabase } from "../supabaseClient";
 
@@ -29,6 +29,7 @@ type SharePayload = {
 interface ShareStepProps {
   selectedFlowers: SelectedFlower[];
   holder: BouquetHolder;
+  holders: BouquetHolder[];
   recipientName: string;
   messageBody: string;
   fromName: string;
@@ -40,6 +41,7 @@ interface ShareStepProps {
 const ShareStep: React.FC<ShareStepProps> = ({
   selectedFlowers,
   holder,
+  holders,
   recipientName,
   messageBody,
   fromName,
@@ -180,7 +182,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
     Boolean(renderModel.fromName?.trim());
 
   const resolvedHolder =
-    HOLDERS.find((h) => h.id === renderModel.holderId) ?? holder;
+    holders.find((h) => h.id === renderModel.holderId) ?? holder;
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
@@ -191,9 +193,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
         </div>
 
         <p className="mt-4 font-bold text-gray-900 text-lg sm:text-xl z-10">
-          {renderModel.fromName
-            ? "Hi, I made this bouquet for you!"
-            : "A bouquet made with love."}
+          {renderModel.fromName ? "Hi, I made this bouquet for you!" : "A bouquet made with love."}
         </p>
       </div>
 
@@ -202,9 +202,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
         {badLink && (
           <div className="mx-auto w-full max-w-[760px] mb-6">
             <div className="bg-white border border-gray-300 shadow-xl px-6 py-5 text-left rounded-md">
-              <div className="font-bold text-gray-900 mb-1">
-                This share link is invalid.
-              </div>
+              <div className="font-bold text-gray-900 mb-1">This share link is invalid.</div>
               <div className="text-sm text-gray-600">
                 The bouquet data could not be loaded. Please ask for a new link.
               </div>
@@ -226,13 +224,15 @@ const ShareStep: React.FC<ShareStepProps> = ({
               holder={resolvedHolder}
               clip={false}
               holderFit="contain"
+              interactive={false}
             />
+
           </div>
         </div>
 
         {/* Letter card */}
         {hasLetter && (
-          <div className="relative -mt-24 mb-10 flex justify-center">
+          <div className="relative mt-4 mb-10 flex justify-center">
             <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left">
               <div className="text-md text-gray-800 mb-6">
                 {renderModel.recipientName?.trim()
@@ -255,12 +255,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
         {/* Share link section (only if NOT opened from a share link) */}
         {!openedFromLink && (
-          <div
-            className={[
-              "w-full flex flex-col items-center mb-10",
-              hasLetter ? "mt-2" : "-mt-10 sm:-mt-12",
-            ].join(" ")}
-          >
+          <div className="w-full flex flex-col items-center mb-10">
             <div className="w-full max-w-[760px]">
               <div className="text-xs font-bold tracking-widest text-gray-600 mb-3">
                 CREATE SHAREABLE LINK
@@ -280,20 +275,14 @@ const ShareStep: React.FC<ShareStepProps> = ({
                   className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                   type="button"
                 >
-                  {isGenerating
-                    ? "Generating..."
-                    : copied
-                    ? "Copied!"
-                    : shareUrl
-                    ? "Copy Again"
-                    : "Copy"}
+                  {isGenerating ? "Generating..." : copied ? "Copied!" : shareUrl ? "Copy Again" : "Copy"}
                 </button>
               </div>
 
               <div className="mt-6 flex justify-center gap-4">
                 <button
                   onClick={onBack}
-                  className="px-4 py-2 text-xs sm:px-12 sm:py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90 transition-opacity"
+                  className="px-4 py-2 text-xs sm:px-12 sm:py-3 rounded-md font-bold tracking-widest uppercase bg-black text-white hover:opacity-90"
                   type="button"
                 >
                   Back
@@ -301,7 +290,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
                 <button
                   onClick={onRestart}
-                  className="px-6 py-2 sm:px-12 sm:py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60 transition-colors"
+                  className="px-6 py-2 sm:px-12 sm:py-3 rounded-md font-bold tracking-widest uppercase border border-gray-400 text-gray-700 hover:bg-white/60"
                   type="button"
                 >
                   Make Another
@@ -310,25 +299,28 @@ const ShareStep: React.FC<ShareStepProps> = ({
             </div>
           </div>
         )}
+{/* Footer */}
+<div className="text-md text-gray-500 text-center space-y-2 mb-10">
+  <div>
+    made with Typescript, a tool by{" "}
+    <a
+      href="https://madebydianna.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline hover:text-gray-700 transition-colors"
+    >
+      @MadebyDianna
+    </a>
+  </div>
 
-        {/* Footer */}
-        <div className="text-md text-gray-500 text-center space-y-2 mb-10">
-          <div>
-            made with Typescript, a tool by{" "}
-            <a
-              href="https://madebydianna.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-700 transition-colors"
-            >
-              @MadebyDianna
-            </a>
-          </div>
-
-          <button onClick={onRestart} className="underline cursor-pointer" type="button">
-            {openedFromLink ? "Create your own bouquet" : "make a bouquet now!"}
-          </button>
-        </div>
+  <button
+    onClick={onRestart}
+    className="underline cursor-pointer"
+    type="button"
+  >
+    {openedFromLink ? "Create your own bouquet" : "make a bouquet now!"}
+  </button>
+</div>
 
         <div className="h-10" />
       </div>
