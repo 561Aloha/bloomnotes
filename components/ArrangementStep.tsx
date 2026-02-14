@@ -107,9 +107,7 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
             ›
           </button>
         </div>
-
-        {/* ✅ Desktop Shuffle stays where it was */}
-        <div className="hidden md:flex mt-6 mb-10 justify-center">
+        <div className="hidden md:flex mt-10 mb-10 justify-center relative z-[80]">
           <button
             onClick={onShuffle}
             className="px-8 py-3 rounded-full border border-gray-500 text-gray-900 text-sm tracking-widest uppercase hover:bg-white/60 transition-colors"

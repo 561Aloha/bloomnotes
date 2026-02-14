@@ -214,11 +214,11 @@ const ShareStep: React.FC<ShareStepProps> = ({
           className={[
             "mx-auto relative w-full max-w-[800px]",
             hasLetter
-              ? "h-[420px] sm:h-[520px] md:h-[560px] lg:h-[600px] mb-6"
+              ? "h-[400px] sm:h-[520px] md:h-[560px] lg:h-[600px] mb-6"
               : "h-[400px] sm:h-[420px] md:h-[460px] lg:h-[500px] mb-4",
           ].join(" ")}
         >
-          <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-4">
+          <div className="absolute inset-0 -translate-y-8 sm:-translate-y-10 md:-translate-y-6">
             <BouquetPreview
               selectedFlowers={renderModel.flowers}
               holder={resolvedHolder}
@@ -232,8 +232,8 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
         {/* Letter card */}
         {hasLetter && (
-          <div className="relative mt-4 mb-10 flex justify-center">
-            <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left">
+          <div className="relative -mt-24 sm:-mt-28 md:-mt-32 mb-10 flex justify-center z-20">
+            <div className="w-[420px] max-w-full bg-white shadow-xl border border-gray-300 px-8 py-8 text-left rounded-md">
               <div className="text-md text-gray-800 mb-6">
                 {renderModel.recipientName?.trim()
                   ? `Dear ${renderModel.recipientName.trim()},`
@@ -252,6 +252,7 @@ const ShareStep: React.FC<ShareStepProps> = ({
             </div>
           </div>
         )}
+
 
         {/* Share link section (only if NOT opened from a share link) */}
         {!openedFromLink && (
