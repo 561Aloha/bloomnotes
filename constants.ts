@@ -3,28 +3,28 @@
 import { Flower, BouquetHolder } from './types';
 
 // 🌸 Flower imports
-import flower1 from './assets/flower1.png';
-import flower2 from './assets/flower2.png';
-import flower3 from './assets/flower3.png';
-import flower4 from './assets/flower4.png';
-import flower5 from './assets/flower5.png';
-import flower6 from './assets/flower6.png';
-import flower7 from './assets/flower7.png';
-import flower8 from './assets/flower8.png';
-import flower9 from './assets/flower9.png';
-import flower10 from './assets/flower10.png';
-import flower11 from './assets/flower11.png';
-import flower12 from './assets/flower12.png';
-import flower13 from './assets/flower13.png';
-import flower14 from './assets/flower14.png';
+import flower1 from './assets/flower1.webp';
+import flower2 from './assets/flower2.webp';
+import flower3 from './assets/flower3.webp';
+import flower4 from './assets/flower4.webp';
+import flower5 from './assets/flower5.webp';
+import flower6 from './assets/flower6.webp';
+import flower7 from './assets/flower7.webp';
+import flower8 from './assets/flower8.webp';
+import flower9 from './assets/flower9.webp';
+import flower10 from './assets/flower10.webp';
+import flower11 from './assets/flower11.webp';
+import flower12 from './assets/flower12.webp';
+import flower13 from './assets/flower13.webp';
+import flower14 from './assets/flower14.webp';
 
 // 🌿 Holder PNG imports (YOUR greenery files)
-import greenery2 from './assets/greenery2.png';
-import greenery3 from './assets/greenery3.png';
-import greenery4 from './assets/greenery4.png';
-import greenery5 from './assets/greenery5.png';
-import greenery6 from './assets/greenery6.png';
-import greenery7 from './assets/greenery7.png';
+import greenery2 from './assets/greenery2.webp';
+import greenery3 from './assets/greenery3.webp';
+import greenery4 from './assets/greenery4.webp';
+import greenery5 from './assets/greenery5.webp';
+import greenery6 from './assets/greenery6.webp';
+import greenery7 from './assets/greenery7.webp';
 
 export const FLOWERS: Flower[] = [
   { id: '1', name: 'Peony', imageUrl: flower1, color: 'bg-pink-100' },
