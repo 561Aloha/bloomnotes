@@ -48,7 +48,6 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
       return acc;
     }, {} as CountMap);
   }, [selectedFlowers]);
-
   const chips = useMemo(() => {
     return (Object.entries(counts) as Array<[string, CountInfo]>).map(
       ([id, info]) => ({
@@ -82,10 +81,11 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
         <div className="
         grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4
         gap-x-1 gap-y-1 sm:gap-x-3 sm:gap-y-3 place-items-center ">
-          {FLOWERS.slice(0, 14).map((flower) => {
-            const countForThis = counts[flower.id]?.count ?? 0;
+        {FLOWERS.slice(0, 14).map((flower, index) => {
+          const countForThis = counts[flower.id]?.count ?? 0;
 
-            return (
+
+          return (
             <button
               key={flower.id}
               onClick={() => {
@@ -99,28 +99,29 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
               ].join(" ")}
               type="button"
             >
+              <img
+                src={flower.imageUrl}
+                alt={flower.name}
+                width={210}
+                height={210}
+                decoding="async"
+                className="
+                  w-[140px] h-[140px]
+                  sm:w-[170px] sm:h-[170px]
+                  md:w-[190px] md:h-[190px]
+                  lg:w-[210px] lg:h-[210px]
+                  object-cover rounded-xl transition-transform duration-300 group-hover:scale-105
+                "
+              />
 
-                <img
-                  src={flower.imageUrl}
-                  alt={flower.name}
-                  className="
-                    w-[140px] h-[140px]
-                    sm:w-[170px] sm:h-[170px]
-                    md:w-[190px] md:h-[190px]
-                    lg:w-[210px] lg:h-[210px]
-                    object-cover rounded-xl transition-transform duration-300 group-hover:scale-105
-                  "
-                />
-
-                {/* Count bubble */}
-                {countForThis > 0 && (
-                  <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-black text-white text-xs flex items-center justify-center">
-                    {countForThis}
-                  </div>
-                )}
-              </button>
-            );
-          })}
+              {countForThis > 0 && (
+                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-black text-white text-xs flex items-center justify-center">
+                  {countForThis}
+                </div>
+              )}
+            </button>
+          );
+        })}
         </div>
 
         {/* Selection Chips */}
