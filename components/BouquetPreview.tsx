@@ -18,17 +18,92 @@ const glowMap: Record<string, string> = {
 };
 
 const getGlowColor = (id: string) => glowMap[id] || "#ffffff";
-
-function jitterFor(seed: string) {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-  const x = (h % 25) - 12;
-  const y = ((h >> 5) % 25) - 12;
-  return { x, y };
-}
-
-// 0=xs, 1=s, 2=m, 3=l
 const SIZE_STEPS = [0.85, 1.0, 1.15, 1.3] as const;
+
+const BOX = 300;
+const CX = BOX / 2; 
+const CY = BOX / 2; 
+
+/**
+ * Generates organic bouquet positions.
+ *
+ * Strategy:
+ * - One flower always goes near center (slightly randomized)
+ * - Remaining flowers are placed radially outward at varying angles/distances
+ * - Angles are biased toward the top arc (a bouquet fans upward)
+ * - Each shuffle rotates/offsets the radial spread differently
+ */
+function computeBouquetLayout(
+  flowers: SelectedFlower[],
+  shuffleKey: number
+): Array<{ x: number; y: number; z: number }> {
+  const count = flowers.length;
+
+  // Seeded PRNG — different per flower index + shuffleKey
+  const rand = (seed: number): number => {
+    let s = (seed ^ (shuffleKey * 2654435761)) >>> 0;
+    s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
+    s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
+    s = s ^ (s >>> 16);
+    return (s >>> 0) / 0xffffffff;
+  };
+
+  // Shuffle flower indices so "center" role rotates each shuffle
+  const order = flowers.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(rand(i * 77 + 3) * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+
+  // Global rotation offset per shuffle — rotates the whole fan
+  const globalRotOffset = rand(999) * Math.PI * 2;
+
+  return flowers.map((flower, idx) => {
+    const role = order.indexOf(idx); // 0 = center flower
+
+    let x: number, y: number;
+
+    if (role === 0 || count === 1) {
+      // CENTER flower — always near middle, slight organic nudge
+      const nudgeX = (rand(idx * 13 + 1) - 0.5) * 28;
+      const nudgeY = (rand(idx * 13 + 2) - 0.5) * 22;
+      x = CX + nudgeX;
+      y = CY + nudgeY;
+    } else {
+
+      const outerCount = count - 1;
+      const outerRole = role - 1; // 0-based among outer flowers
+
+      const arcStart = -Math.PI * 0.85; // ~-153° from right = upper-left
+      const arcEnd   =  Math.PI * 0.85; // ~+153° from right = upper-right
+      const arcSpan  = arcEnd - arcStart;
+
+      const sliceSize = arcSpan / outerCount;
+      const sliceCenter = arcStart + sliceSize * outerRole + sliceSize / 2;
+
+      const jitter = (rand(idx * 17 + 5) - 0.5) * sliceSize * 0.7;
+      const angle = sliceCenter + jitter + globalRotOffset * 0.15; // small global drift
+
+      // Distance from center: closer flowers overlap more naturally
+      // Vary between 55–100px radius
+      const minR = 70;
+      const maxR = 100;
+      const r = minR + rand(idx * 23 + 7) * (maxR - minR);
+
+      x = CX + Math.cos(angle) * r;
+      y = CY + Math.sin(angle) * r; // sin(negative angle) = up
+
+      x += (rand(idx * 31 + 9)  - 0.5) * 14;
+      y += (rand(idx * 31 + 11) - 0.5) * 14;
+    }
+
+    return {
+      x,
+      y,
+      z: flower.zIndex ?? idx + 1,
+    };
+  });
+}
 
 export default function BouquetPreview({
   selectedFlowers,
@@ -37,6 +112,7 @@ export default function BouquetPreview({
   holderFit = "cover",
   className = "",
   interactive = true,
+  shuffleKey = 0,
 }: {
   selectedFlowers: SelectedFlower[];
   holder: BouquetHolder;
@@ -44,33 +120,34 @@ export default function BouquetPreview({
   holderFit?: "cover" | "contain";
   className?: string;
   interactive?: boolean;
+  shuffleKey?: number;
 }) {
-  // Map instanceId -> sizeStepIndex
   const [sizeMap, setSizeMap] = useState<Record<string, number>>({});
 
   useMemo(() => {
     const ids = new Set(selectedFlowers.map((f) => f.instanceId));
-
     setSizeMap((prev) => {
       const next: Record<string, number> = {};
-
       for (const [k, v] of Object.entries(prev) as [string, number][]) {
-        if (ids.has(k)) next[k] = v; // ✅ v is number now
+        if (ids.has(k)) next[k] = v;
       }
-
       return next;
     });
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [selectedFlowers.map((f) => f.instanceId).join("|")]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFlowers.map((f) => f.instanceId).join("|")]);
 
   const cycleSize = (instanceId: string) => {
     setSizeMap((prev) => {
-      const cur = prev[instanceId] ?? 1; // default = "s"
-      const next = (cur + 1) % 4;
-      return { ...prev, [instanceId]: next };
+      const cur = prev[instanceId] ?? 1;
+      return { ...prev, [instanceId]: (cur + 1) % 4 };
     });
   };
+
+  const layout = useMemo(
+    () => computeBouquetLayout(selectedFlowers, shuffleKey),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedFlowers.map((f) => f.instanceId).join("|"), shuffleKey]
+  );
 
   return (
     <div
@@ -85,105 +162,89 @@ export default function BouquetPreview({
         src={holder.imageUrl}
         alt={holder.name}
         className={[
-          "w-full h-full opacity-90 transition-all duration-500 pointer-events-none",
+          "absolute inset-0 w-full h-full opacity-90 transition-all duration-500 pointer-events-none",
           `object-${holderFit}`,
-          "scale-[1.08] sm:scale-100",
         ].join(" ")}
       />
 
-
-      {/* 🌸 Flowers Layer */}
-      <div className="absolute inset-0">
+      {/* 🌸 300×300 organic bouquet box — centered, pushed down slightly */}
       <div
-        className={[
-          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-          "translate-x-[-12px] sm:translate-x-[-50px] md:translate-x-[-80px]", 
-          "translate-y-[-10px] sm:translate-y-[-40px] md:translate-y-[-20px] lg:translate-y-[-40px]"
-        ].join(" ")}
+        className="absolute"
+        style={{
+          width: BOX,
+          height: BOX,
+          top: "50%",
+          left: "50%",
+          // Shifted down from previous -65% → -52% so cluster sits lower on greenery
+          transform: "translate(-50%, -42%)",
+          zIndex: 10,
+          // outline: "2px dashed red", // ← uncomment to debug
+        }}
       >
+        {selectedFlowers.map((flower, idx) => {
+          const pos = layout[idx];
+          if (!pos) return null;
 
-          <div
-            className={[
-              "flex flex-wrap justify-center items-end relative",
-              "-space-x-14 -space-y-16",
-              "sm:-space-x-10 sm:-space-y-20",
-              "md:-space-x-14 md:-space-y-24",
-            ].join(" ")}
-          >
-            {selectedFlowers.map((flower, idx) => {
-              const j = jitterFor(flower.instanceId);
+          const isLarge =
+            flower.id === "flower1" ||
+            flower.id === "flower3" ||
+            flower.id === "flower10" ||
+            flower.id === "flower9";
 
-              const isLarge =
-                flower.id === "flower1" ||
-                flower.id === "flower3" ||
-                flower.id === "flower10" ||
-                flower.id === "flower9";
+          const FLOWER_SIZE = isLarge ? 140 : 125;
+          const stepIndex = sizeMap[flower.instanceId] ?? 1;
+          const sizeMult = SIZE_STEPS[stepIndex];
 
-              const z = flower.zIndex ?? idx + 1;
-
-              const baseSizeClass = isLarge
-                ? "w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
-                : z <= 4
-                ? "w-24 h-24 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48"
-                : "w-20 h-20 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40";
-
-              const stepIndex = sizeMap[flower.instanceId] ?? 1; // default s
-              const sizeMult = SIZE_STEPS[stepIndex];
-
-            return (
-              <button
-                key={flower.instanceId}
-                type="button"
-                disabled={!interactive}
-                className={[
-                  "relative flex justify-center items-end bg-transparent border-0 p-0 m-0",
-                  interactive ? "cursor-pointer" : "cursor-default",
-                ].join(" ")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!interactive) return;    
-                  cycleSize(flower.instanceId); 
-                }}
-                onTouchStart={(e) => {
-                  e.stopPropagation();
-                }}
+          return (
+            <button
+              key={flower.instanceId}
+              type="button"
+              disabled={!interactive}
+              className={[
+                "absolute bg-transparent border-0 p-0 m-0 flex items-center justify-center",
+                interactive ? "cursor-pointer" : "cursor-default",
+              ].join(" ")}
+              style={{
+                width: FLOWER_SIZE,
+                height: FLOWER_SIZE,
+                left: pos.x - FLOWER_SIZE / 2,
+                top: pos.y - FLOWER_SIZE / 2,
+                zIndex: 50 + pos.z,
+                transition:
+                  "left 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!interactive) return;
+                cycleSize(flower.instanceId);
+              }}
+              onTouchStart={(e) => e.stopPropagation()}
+            >
+              {/* Glow */}
+              <div
+                className="absolute inset-0 rounded-full blur-[40px] opacity-15 pointer-events-none"
                 style={{
-                  zIndex: 50 + z,
-                  transform: `translate(${(flower.offsetX ?? 0) + j.x}px, ${
-                    (flower.offsetY ?? 0) + j.y
-                  }px)`,
-                  transition: "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  background: `radial-gradient(circle, ${getGlowColor(flower.id)} 0%, transparent 70%)`,
                 }}
-              >
-                {/* Glow */}
-                <div
-                  className="absolute rounded-full blur-[60px] sm:blur-[70px] opacity-10 pointer-events-none"
-                  style={{
-                    width: "140%",
-                    height: "140%",
-                    background: `radial-gradient(circle, ${getGlowColor(flower.id)} 0%, transparent 70%)`,
-                  }}
-                />
+              />
 
-                {/* Flower image */}
-                <img
-                  src={flower.imageUrl}
-                  alt={flower.name}
-                  className={`relative object-contain drop-shadow-xl ${baseSizeClass}`}
-                  style={{
-                    transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
-                    transition: "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    transformOrigin: "bottom center",
-                    touchAction: "manipulation",
-                  }}
-                  draggable={false}
-                />
-              </button>
-            );
-
-            })}
-          </div>
-        </div>
+              {/* Flower image */}
+              <img
+                src={flower.imageUrl}
+                alt={flower.name}
+                className="relative object-contain drop-shadow-xl w-full h-full"
+                style={{
+                  transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
+                  transition:
+                    "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  transformOrigin: "center center",
+                  touchAction: "manipulation",
+                }}
+                draggable={false}
+              />
+            </button>
+          );
+        })}
       </div>
     </div>
   );

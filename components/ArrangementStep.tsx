@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { SelectedFlower, BouquetHolder, LayoutType } from "../types";
 import BouquetPreview from "./BouquetPreview";
 
@@ -16,13 +16,20 @@ interface ArrangementStepProps {
 const ArrangementStep: React.FC<ArrangementStepProps> = ({
   selectedFlowers,
   currentHolder,
-  layoutType, // (ok to remove if truly unused)
   onPrevHolder,
   onNextHolder,
   onShuffle,
   onBack,
   onNext,
 }) => {
+  // Local counter so BouquetPreview knows when to re-randomize Y positions
+  const [shuffleKey, setShuffleKey] = useState(0);
+
+  const handleShuffle = () => {
+    setShuffleKey((k) => k + 1);
+    onShuffle();
+  };
+
   return (
     <div className="w-full min-h-screen flex flex-col items-center text-center animate-fadeIn bg-[#f3f0e6]">
       {/* Header */}
@@ -42,20 +49,17 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
 
       {/* Preview wrapper */}
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto relative z-0 w-full max-w-[800px] h-[475px] sm:h-[520px] md:h-[600px] lg:h-[680px]">
-          {/* Mobile shuffle overlay */}
-          <div className="md:hidden absolute top-2 inset-x-0 z-50 flex justify-center px-4">
+        <div className="mx-auto relative z-0 w-full max-w-[800px] h-[420px] sm:h-[480px] md:h-[540px] lg:h-[620px]">
+
+          {/* Mobile shuffle button (top overlay) */}
+          <div className="md:hidden absolute top-1 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px]">
             <button
-              onClick={onShuffle}
-              className="w-full max-w-[420px] px-6 py-2 rounded-full border border-gray-500 bg-white/80 text-gray-900 text-xs tracking-widest uppercase hover:bg-white transition-colors shadow-sm backdrop-blur text-center"
+              onClick={handleShuffle}
+              className="w-full px-6 py-2 rounded-full border border-gray-500 bg-white/80 text-gray-900 text-xs tracking-widest uppercase hover:bg-white transition-colors shadow-sm backdrop-blur whitespace-nowrap"
               type="button"
             >
               Shuffle Style
             </button>
-          </div>
-          {/* Desktop holder pill */}
-          <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 px-2.5 py-2 rounded-full text-sm font-bold text-gray-600 shadow-sm">
-            {currentHolder.name}
           </div>
 
           <BouquetPreview
@@ -64,7 +68,13 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
             clip={false}
             holderFit="contain"
             interactive={true}
+            shuffleKey={shuffleKey}
           />
+
+          {/* Desktop holder pill */}
+          <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 px-8 py-2 rounded-full text-md font-bold text-gray-600 shadow-sm">
+            {currentHolder.name}
+          </div>
 
           {/* Desktop side arrows */}
           <button
@@ -109,10 +119,10 @@ const ArrangementStep: React.FC<ArrangementStepProps> = ({
           </button>
         </div>
 
-        {/* Desktop shuffle button */}
+        {/* Desktop shuffle */}
         <div className="hidden md:flex mt-10 mb-10 justify-center relative z-[80]">
           <button
-            onClick={onShuffle}
+            onClick={handleShuffle}
             className="px-8 py-3 rounded-full border border-gray-500 text-gray-900 text-sm tracking-widest uppercase hover:bg-white/60 transition-colors"
             type="button"
           >
