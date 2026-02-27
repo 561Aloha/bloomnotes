@@ -97,12 +97,9 @@ export default function BouquetPreview({
       <div
         className={[
           "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-          "translate-y-[-10px] sm:translate-y-[-80px] md:translate-y-[-120px] lg:translate-y-[-140px]"
+          "translate-x-[-12px] sm:translate-x-[-50px] md:translate-x-[-80px]", 
+          "translate-y-[-10px] sm:translate-y-[-40px] md:translate-y-[-20px] lg:translate-y-[-40px]"
         ].join(" ")}
-        style={{
-          width: "clamp(220px, 75vw, 460px)",
-          height: "clamp(260px, 55vw, 520px)", // 👈 NEW
-        }}
       >
 
           <div
@@ -124,14 +121,12 @@ export default function BouquetPreview({
 
               const z = flower.zIndex ?? idx + 1;
 
-              // Your base size logic stays
               const baseSizeClass = isLarge
                 ? "w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64"
                 : z <= 4
                 ? "w-24 h-24 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48"
                 : "w-20 h-20 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40";
 
-              // Tap-size multiplier (xs/s/m/l)
               const stepIndex = sizeMap[flower.instanceId] ?? 1; // default s
               const sizeMult = SIZE_STEPS[stepIndex];
 
@@ -146,8 +141,8 @@ export default function BouquetPreview({
                 ].join(" ")}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!interactive) return;     // ✅ locks in ShareStep
-                  cycleSize(flower.instanceId); // ✅ works in Arrangement
+                  if (!interactive) return;    
+                  cycleSize(flower.instanceId); 
                 }}
                 onTouchStart={(e) => {
                   e.stopPropagation();
