@@ -1,0 +1,28 @@
+import fs from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
+
+const ASSETS_DIR = path.resolve("./assets");
+const WIDTH = 420;      // 2x your max displayed size (210)
+const QUALITY = 80;
+
+const pngs = fs.readdirSync(ASSETS_DIR).filter((f) => f.endsWith(".png"));
+
+if (pngs.length === 0) {
+  console.log("No PNGs found in", ASSETS_DIR);
+  process.exit(0);
+}
+
+for (const file of pngs) {
+  const input = path.join(ASSETS_DIR, file);
+  const output = path.join(ASSETS_DIR, file.replace(/\.png$/i, ".webp"));
+
+  await sharp(input)
+    .resize({ width: WIDTH, withoutEnlargement: true })
+    .webp({ quality: QUALITY })
+    .toFile(output);
+
+  console.log("✓", file, "->", path.basename(output));
+}
+
+console.log("Done. Wrote", pngs.length, "webp files to", ASSETS_DIR);
