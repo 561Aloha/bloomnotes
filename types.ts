@@ -1,11 +1,16 @@
-
 export interface Flower {
   id: string;
   name: string;
-  imageUrl: string;
+  imageBase: string; 
+  imageThumb?: string;  // optional so existing flowers without thumbs still work
   color: string;
 }
 
+export interface BouquetHolder {
+  id: string;
+  name: string;
+  imageBase: string; 
+}
 export interface SelectedFlower extends Flower {
   instanceId: string;
   zIndex: number;
@@ -14,11 +19,6 @@ export interface SelectedFlower extends Flower {
   offsetY: number;
 }
 
-export interface BouquetHolder {
-  id: string;
-  name: string;
-  imageUrl: string;
-}
 
 export type Step = 'selection' | 'arrangement' | 'message' | 'share';
 

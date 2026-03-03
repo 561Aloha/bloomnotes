@@ -99,20 +99,15 @@ const SelectionStep: React.FC<SelectionStepProps> = ({
               ].join(" ")}
               type="button"
             >
-              <img
-                src={flower.imageUrl}
-                alt={flower.name}
-                width={210}
-                height={210}
-                decoding="async"
-                className="
-                  w-[140px] h-[140px]
-                  sm:w-[170px] sm:h-[170px]
-                  md:w-[190px] md:h-[190px]
-                  lg:w-[210px] lg:h-[210px]
-                  object-cover rounded-xl transition-transform duration-300 group-hover:scale-105
-                "
-              />
+          <img
+            src={flower.imageThumb ?? flower.imageBase}  // use thumb if available on the type
+            alt={flower.name}
+            width={210}
+            height={210}
+            loading={index < 4 ? "eager" : "lazy"}  // eagerly load above-the-fold flowers
+            decoding="async"
+            className="w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] md:w-[190px] md:h-[190px] lg:w-[210px] lg:h-[210px] object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+          />
 
               {countForThis > 0 && (
                 <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-black text-white text-xs flex items-center justify-center">

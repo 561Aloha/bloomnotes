@@ -6,7 +6,7 @@ import BouquetPreview from "./BouquetPreview";
 import { supabase } from "../supabaseClient";
 
 /* ------------------- Share Payload Types ------------------- */
-
+declare const gtag: (...args: unknown[]) => void;
 type ShareFlower = {
   id: string;
   instanceId: string;
@@ -79,6 +79,37 @@ const ShareStep: React.FC<ShareStepProps> = ({
   );
 
   /* ----------- Load from short share link (#/share/:id) ----------- */
+  // Auto-generate on mount
+useEffect(() => {
+  if (openedFromLink) return; // don't generate if viewing someone else's bouquet
+
+  (async () => {
+    setIsGenerating(true);
+
+    const res = await supabase
+      .from("bouquet_links")
+      .insert({ data: payload })
+      .select("id");
+
+    setIsGenerating(false);
+
+    if (res.error) {
+      gtag("event", "bouquet_created", { success: false, error: res.error.code });
+      return;
+    }
+
+    const newId = res.data?.[0]?.id;
+    if (!newId) {
+      gtag("event", "bouquet_created", { success: false, error: "no_id_returned" });
+      return;
+    }
+
+    const url = `${window.location.origin}#/share/${newId}`;
+    setShareUrl(url);
+    gtag("event", "bouquet_created", { success: true });
+  })();
+}, [openedFromLink]);
+
   useEffect(() => {
     const hash = window.location.hash || "";
     const match = hash.match(/^#\/share\/([^?]+)/);
@@ -107,6 +138,8 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
   /* ----------- Create short share link ----------- */
   const createShareLink = async () => {
+    if (!shareUrl) return;
+    
     if (shareUrl) {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -142,6 +175,8 @@ const ShareStep: React.FC<ShareStepProps> = ({
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+
+        gtag('event', 'share_link_created');
   };
 
   /* ----------- Build Render Model ----------- */
@@ -272,11 +307,11 @@ const ShareStep: React.FC<ShareStepProps> = ({
 
                 <button
                   onClick={createShareLink}
-                  disabled={isGenerating}
+                  disabled={isGenerating || !shareUrl}
                   className="px-5 py-3 rounded-md bg-black text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                   type="button"
                 >
-                  {isGenerating ? "Generating..." : copied ? "Copied!" : shareUrl ? "Copy Again" : "Copy"}
+                  {isGenerating ? "Generating..." : copied ? "Copied!" : "Copy"}
                 </button>
               </div>
 

@@ -159,8 +159,11 @@ export default function BouquetPreview({
     >
       {/* 🌿 Holder / Greenery */}
       <img
-        src={holder.imageUrl}
+        src={holder.imageBase}
         alt={holder.name}
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
         className={[
           "absolute inset-0 w-full h-full opacity-90 transition-all duration-500 pointer-events-none",
           `object-${holderFit}`,
@@ -228,20 +231,21 @@ export default function BouquetPreview({
                 }}
               />
 
-              {/* Flower image */}
-              <img
-                src={flower.imageUrl}
-                alt={flower.name}
-                className="relative object-contain drop-shadow-xl w-full h-full"
-                style={{
-                  transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
-                  transition:
-                    "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                  transformOrigin: "center center",
-                  touchAction: "manipulation",
-                }}
-                draggable={false}
-              />
+        <img
+          src={flower.imageBase}
+          alt={flower.name}
+          className="relative object-contain drop-shadow-xl w-full h-full"
+          style={{
+            transform: `rotate(${flower.rotation ?? 0}deg) scale(${sizeMult})`,
+            transition: "transform 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+            transformOrigin: "center center",
+            touchAction: "manipulation",
+          }}
+          draggable={false}
+          decoding="async"
+          loading="eager"
+          fetchPriority="high"
+        />
             </button>
           );
         })}
